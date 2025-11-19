@@ -19,7 +19,7 @@ export default function KPICard({
   target,
   variant = "default",
 }: KPICardProps) {
-  const isSuccess = variant === "success";
+  const isSuccess = target ? target.met === true : variant === "success";
   const iconColor = isSuccess ? "text-green-500" : "text-gray-400";
 
   return (

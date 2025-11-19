@@ -1,7 +1,7 @@
 /**
  * Throughput & Predictability section
  * Displays:
- * - Planned vs Done chart (12-week rolling window)
+ * - Planned vs Done chart
  * - Weekly Flow chart (Done, In Progress, Carry Over tasks)
  */
 "use client";
@@ -80,7 +80,7 @@ export default function Throughput_Predicatibility() {
           <div className="flex flex-col">
             <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
               <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-              Planned vs Done (12-week Rolling)
+              Planned vs Done
             </h3>
             <p className="text-sm text-gray-500 mb-4 ml-3">Tasks planned versus tasks completed per week</p>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
@@ -114,7 +114,7 @@ export default function Throughput_Predicatibility() {
         <div className="space-y-4 text-sm text-gray-700">
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Planned vs Done Chart</h3>
-            <p className="mb-2">Shows the comparison between tasks planned and tasks completed over a 12-week rolling period.</p>
+            <p className="mb-2">Shows the comparison between tasks planned and tasks completed per week.</p>
             <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2">
               <li><strong>Planned:</strong> Total tasks in active sprints during each week</li>
               <li><strong>Done:</strong> Tasks marked as completed during each week</li>
@@ -144,7 +144,7 @@ export default function Throughput_Predicatibility() {
           {/* Planned vs Done Chart */}
           {plannedVsDoneData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Planned vs Done (12-week Rolling)</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Planned vs Done</h3>
               <div className="h-[500px]">
                 <PlannedVsDoneChart data={plannedVsDoneData} height={500} />
               </div>

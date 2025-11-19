@@ -128,10 +128,28 @@ def calculate_weekly_planned_vs_done(df_issues, start_date, num_weeks=12, df_spr
 
 
 def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, period_end=None):
-    """Calculate weekly flow data (Done, In Progress, Carry Over). Expects pre-filtered df_issues."""
-    df_issues, usage_stats = ensure_changelog_usage(df_issues, 'weekly_flow')
-
-
+    """
+    Calculate weekly flow data (Done, In Progress, Carry Over).
+    
+    Expects pre-filtered df_issues from apply_standard_filters() for consistency.
+    
+    For each week:
+    - Done: Resolved during week AND Status == 'Done'
+    - In Progress: Planned (Created OR Updated during week) but NOT resolved during week
+    - Carry Over: Created before week AND (Updated OR Resolved during week)
+    - New Issues: Created during the week
+    
+    Args:
+        df_issues: Pre-filtered DataFrame with issues
+        start_date: Start date for analysis
+        num_weeks: Number of weeks (default 12, ignored if period_end provided)
+        df_sprints: Optional sprint DataFrame
+        period_end: Optional end date - includes all overlapping weeks
+    
+    Returns:
+        DataFrame with columns: Week, Week Label, Week Number, Start Date, End Date, 
+        Done, In Progress, Carry Over, New Issues, Total Active
+    """
     start_date = _normalize_date_to_utc(start_date)
     weeks_data = []
     current_date = start_date
@@ -209,48 +227,21 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
         carry_over = filter_carry_over_activities(week_issues, week_start, effective_week_end)
         carry_over_count = len(carry_over)
 
-        in_progress_count = 0
-        if 'Status Transitions' in week_issues.columns:
-            week_issues = pre_parse_transitions(week_issues)
-            for _, row in week_issues.iterrows():
-
-                resolved_date = row.get('Resolved')
-                resolved_dt = None
-                if resolved_date:
-                    resolved_dt = pd.to_datetime(resolved_date, utc=True, errors='coerce')
-
-
-                if resolved_dt is not None and not pd.isna(resolved_dt):
-                    if week_start <= resolved_dt <= effective_week_end:
-                        continue
-
-
-                transitions = row.get('_parsed_transitions', [])
-                if transitions:
-                    try:
-
-                        status_at_end = get_status_at_date(transitions, effective_week_end)
-
-
-                        if status_at_end:
-                            status_lower = str(status_at_end).lower()
-                            if 'in progress' in status_lower or 'development' in status_lower or 'dev' in status_lower:
-                                in_progress_count += 1
-                    except:
-                        pass
-        else:
-
-            week_issues['Resolved'] = pd.to_datetime(week_issues['Resolved'], utc=True, errors='coerce')
-            not_resolved = week_issues[
-                (week_issues['Resolved'].isna()) |
-                (week_issues['Resolved'] > effective_week_end)
-            ]
-
-            if 'Status Category (Mapped)' in not_resolved.columns:
-                in_progress_count = (not_resolved['Status Category (Mapped)'] == 'In Progress').sum()
-            elif 'Status' in not_resolved.columns:
-                status_lower = not_resolved['Status'].astype(str).str.lower()
-                in_progress_count = status_lower.str.contains('in progress|development|dev', case=False, na=False).sum()
+        # In Progress: Planned (Created OR Updated during week) but NOT resolved during week
+        week_issues['Created'] = pd.to_datetime(week_issues['Created'], utc=True, errors='coerce')
+        week_issues['Updated'] = pd.to_datetime(week_issues['Updated'], utc=True, errors='coerce')
+        week_issues['Resolved'] = pd.to_datetime(week_issues['Resolved'], utc=True, errors='coerce')
+        
+        planned_during_week = week_issues[
+            ((week_issues['Created'] >= week_start) & (week_issues['Created'] <= effective_week_end)) |
+            ((week_issues['Updated'] >= week_start) & (week_issues['Updated'] <= effective_week_end))
+        ].copy()
+        
+        in_progress = planned_during_week[
+            (planned_during_week['Resolved'].isna()) |
+            (planned_during_week['Resolved'] > effective_week_end)
+        ]
+        in_progress_count = len(in_progress)
 
         week_issues['Created'] = pd.to_datetime(week_issues['Created'], utc=True, errors='coerce')
         new_issues = week_issues[
@@ -290,23 +281,21 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
 def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=None, period_end=None):
     """
     Calculate average lead time per week.
-    PRIORITIZES CHANGELOG DATA for maximum accuracy.
-    Uses changelog-based lead time when available (starts from "To Do" transition).
-
+    
+    Lead time = Resolved Date - Created Date (in days).
+    Only includes issues with positive lead time.
+    
     Args:
         df_issues: Issues DataFrame
         start_date: Start date for analysis
-        num_weeks: Number of weeks to analyze (default 12, ignored if period_end is provided)
+        num_weeks: Number of weeks (default 12, ignored if period_end provided)
         df_sprints: Optional sprint DataFrame
-        period_end: Optional end date - if provided, includes all weeks that overlap with period
-
+        period_end: Optional end date - includes all overlapping weeks
+    
     Returns:
-        DataFrame with columns: Week, Week Label, Average Lead Time (days), Resolved Issues Count, Overall Average
+        DataFrame with columns: Week, Week Label, Average Lead Time (days), 
+        Resolved Issues Count, Overall Average
     """
-
-    df_issues, usage_stats = ensure_changelog_usage(df_issues, 'lead_time')
-
-
     start_date = _normalize_date_to_utc(start_date)
     weeks_data = []
     current_date = start_date
@@ -355,9 +344,7 @@ def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=N
     df_issues['Created'] = pd.to_datetime(df_issues['Created'], utc=True, errors='coerce')
     df_issues['Resolved'] = pd.to_datetime(df_issues['Resolved'], utc=True, errors='coerce')
 
-
     status_col = 'Status Category (Mapped)' if 'Status Category (Mapped)' in df_issues.columns else 'New Status Category'
-
 
     weekly_lead_time = []
     all_lead_times = []
@@ -370,7 +357,6 @@ def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=N
             effective_week_end = min(week_end, period_end)
         week_issues = df_issues.copy()
 
-
         from app.services.resolution_utils import filter_done_issues
         week_resolved = filter_done_issues(
             week_issues,
@@ -379,8 +365,6 @@ def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=N
             resolved_col='Resolved',
             status_col=status_col
         )
-
-
 
         week_resolved['Created'] = pd.to_datetime(week_resolved['Created'], utc=True, errors='coerce')
         week_resolved['Resolved'] = pd.to_datetime(week_resolved['Resolved'], utc=True, errors='coerce')
@@ -408,8 +392,6 @@ def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=N
         })
 
     df_weekly_lead_time = pd.DataFrame(weekly_lead_time)
-
-
     overall_avg_lead_time = sum(all_lead_times) / len(all_lead_times) if all_lead_times else 0
     overall_avg_lead_time = round(float(overall_avg_lead_time), 2) if overall_avg_lead_time else 0
     df_weekly_lead_time['Overall Average'] = overall_avg_lead_time
@@ -552,13 +534,11 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
     period_start_utc = _normalize_date_to_utc(period_start) if period_start else None
 
 
-    # Start from the month containing end_date
     current_date = end_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     current_date = _normalize_date_to_utc(current_date)
     if period_start_utc:
         period_start_month = period_start_utc.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         period_start_month = _normalize_date_to_utc(period_start_month)
-        # Start from the earlier of end_date month or period_start month
         if period_start_month < current_date:
             current_date = period_start_month
 
@@ -567,24 +547,21 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
     all_lead_times = []
     done_statuses_lower = [s.lower() for s in DONE_STATUSES]
 
-    # Always start from end_date month and go backwards num_months
-    # Start from the month containing end_date
+
     current_date = end_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     current_date = _normalize_date_to_utc(current_date)
     
-    # Build list of months going backwards from end_date
+
     months_to_process = []
     temp_date = current_date
     for _ in range(num_months):
         months_to_process.append(temp_date)
-        # Move to previous month
+
         if temp_date.month == 1:
             temp_date = datetime(temp_date.year - 1, 12, 1, tzinfo=temp_date.tzinfo)
         else:
             temp_date = datetime(temp_date.year, temp_date.month - 1, 1, tzinfo=temp_date.tzinfo)
         temp_date = _normalize_date_to_utc(temp_date)
-    
-    # Reverse to get chronological order (oldest first)
     months_to_process.reverse()
 
     for current_date in months_to_process:
@@ -647,16 +624,13 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
         else:
             avg_lead_time = 0.0
 
-
-        # Only include months with data (total_issues > 0)
-        # This way we stop showing months when there's no data
         if total_issues > 0:
             monthly_trend.append({
                 'Month': month_start.strftime('%b %Y'),
                 'Month Start': month_start,
                 'Month End': month_end,
                 'Planned': total_issues,
-                'Total Issues': total_issues,  # Keep for backward compatibility
+                'Total Issues': total_issues,
                 'Done Count': done_count,
                 'Completion Rate (%)': round(completion_rate, 1),
                 'Average Lead Time (days)': round(avg_lead_time, 2) if avg_lead_time is not None and pd.notna(avg_lead_time) else 0.0,

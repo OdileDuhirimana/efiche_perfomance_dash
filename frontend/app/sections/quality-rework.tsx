@@ -77,9 +77,9 @@ export default function Quality_Rework() {
             <div className="flex flex-col">
               <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
                 <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-                QA vs Failed QA (per sprint)
+                QA vs Failed QA
               </h3>
-              <p className="text-sm text-gray-500 mb-4 ml-3">Quality assurance execution and failure rates by sprint</p>
+              <p className="text-sm text-gray-500 mb-4 ml-3">Quality assurance execution and failure rates per week</p>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
                 <QAVsFailedChart data={qaVsFailedData} />
               </div>
@@ -127,7 +127,7 @@ export default function Quality_Rework() {
         <div className="space-y-4 text-sm text-gray-700">
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">QA vs Failed QA Chart</h3>
-            <p className="mb-2">Tracks quality assurance execution and failure rates by sprint.</p>
+            <p className="mb-2">Tracks quality assurance execution and failure rates per week.</p>
             <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2">
               <li><strong>QA Executed:</strong> Tasks that entered QA/testing status</li>
               <li><strong>Failed QA:</strong> Tasks that failed QA and returned to development</li>

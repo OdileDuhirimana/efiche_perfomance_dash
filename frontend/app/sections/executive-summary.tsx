@@ -76,9 +76,8 @@ export default function ExecutiveSummary() {
           label="Completion Rate"
           value={`${completionRate.toFixed(1)}%`}
           icon={BarChart3}
-          variant="success"
           target={{
-            text: "Target ≤ 80%",
+            text: "Target ≥ 80%",
             met: completionRate >= 80,
           }}
         />
@@ -87,7 +86,6 @@ export default function ExecutiveSummary() {
           label="Avg Lead Time (days)"
           value={avgLeadTime.toFixed(1)}
           icon={Clock}
-          variant="success"
           target={{
             text: "Target ≤ 20",
             met: avgLeadTime <= 20,
@@ -98,7 +96,6 @@ export default function ExecutiveSummary() {
           label="Rework Ratio"
           value={`${reworkRatio}%`}
           icon={Repeat}
-          variant="success"
           target={{
             text: "Target ≤ 10%",
             met: reworkRatio <= 10,
