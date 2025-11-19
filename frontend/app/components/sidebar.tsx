@@ -1,11 +1,4 @@
-/**
- * Sidebar navigation component
- * Features:
- * - Navigation menu with scroll-to-section functionality
- * - Active section highlighting based on scroll position (IntersectionObserver)
- * - Quick stats display (completion rate, active tasks)
- * - Mobile-responsive with hamburger menu
- */
+/** Sidebar navigation component */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,25 +12,16 @@ export default function Sidebar() {
   const [activeItem, setActiveItem] = useState("executive-summary");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   
-  // Fetch data for quick stats display
   const { data: executiveData, loading: executiveLoading } = useExecutiveSummary();
-  const { data: throughputData, loading: throughputLoading } = useThroughputData(12);
   
   const completionRate = executiveData?.completionRate || 0;
   
-  // Calculate active tasks: planned - done from latest week
-  const activeTasks = throughputData?.plannedVsDone && throughputData.plannedVsDone.length > 0
-    ? (() => {
-        const latestWeek = throughputData.plannedVsDone[throughputData.plannedVsDone.length - 1];
-        const planned = latestWeek.planned || 0;
-        const done = latestWeek.done || 0;
-        return Math.max(0, planned - done);
-      })()
+  const activeTasks = executiveData
+    ? Math.max(0, (executiveData.planned || 0) - (executiveData.done || 0))
     : 0;
   
-  const isLoading = executiveLoading || throughputLoading;
+  const isLoading = executiveLoading;
 
-  // Navigation ID to section ID mapping
   const sectionIdMap: Record<string, string> = {
     'executive-summary': 'executive-summary',
     'throughput': 'throughput-predictability',
@@ -46,7 +30,6 @@ export default function Sidebar() {
     'company-trend': 'company-level',
   };
 
-  // Reverse mapping: section ID -> navigation ID
   const navIdMap: Record<string, string> = {
     'executive-summary': 'executive-summary',
     'throughput-predictability': 'throughput',
@@ -55,7 +38,6 @@ export default function Sidebar() {
     'company-level': 'company-trend',
   };
 
-  // Auto-highlight active section based on scroll position using IntersectionObserver
   useEffect(() => {
     let observer: IntersectionObserver | null = null;
     let scrollTimeout: NodeJS.Timeout;
@@ -64,21 +46,17 @@ export default function Sidebar() {
       sectionId: sectionIdMap[key],
     }));
 
-    // Wait a bit for sections to render
     const timeoutId = setTimeout(() => {
       const observerOptions = {
         root: null,
-        rootMargin: '-100px 0px -60% 0px', // Trigger when section is near top of viewport (accounting for header)
-        threshold: [0, 0.1, 0.5, 1], // Multiple thresholds for better detection
+        rootMargin: '-100px 0px -60% 0px',
+        threshold: [0, 0.1, 0.5, 1],
       };
       
       const observerCallback = (entries: IntersectionObserverEntry[]) => {
-        // Clear any pending updates
         clearTimeout(scrollTimeout);
         
-        // Debounce updates to prevent rapid changes
         scrollTimeout = setTimeout(() => {
-          // Find the section that's most visible in the viewport
           let maxIntersection = 0;
           let activeSectionId = 'executive-summary';
 
@@ -89,9 +67,8 @@ export default function Sidebar() {
             }
           });
 
-          // Also check scroll position as fallback
           if (maxIntersection === 0) {
-            const scrollPosition = window.scrollY + 150; // Offset for header
+            const scrollPosition = window.scrollY + 150;
             sections.forEach(({ sectionId }) => {
               const element = document.getElementById(sectionId);
               if (element) {
@@ -106,16 +83,14 @@ export default function Sidebar() {
             });
           }
 
-          // Update active item if we found a visible section
           if (navIdMap[activeSectionId]) {
             setActiveItem(navIdMap[activeSectionId]);
           }
-        }, 100); // Debounce for 100ms
+        }, 100);
       };
 
       observer = new IntersectionObserver(observerCallback, observerOptions);
 
-      // Observe all sections
       sections.forEach(({ sectionId }) => {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -123,7 +98,6 @@ export default function Sidebar() {
         }
       });
 
-      // Initial check on mount
       const checkInitialSection = () => {
         const scrollPosition = window.scrollY + 150;
         sections.forEach(({ sectionId, navId }) => {
@@ -141,9 +115,8 @@ export default function Sidebar() {
       };
       
       checkInitialSection();
-    }, 500); // Wait 500ms for sections to render
+    }, 500);
 
-    // Cleanup
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(scrollTimeout);

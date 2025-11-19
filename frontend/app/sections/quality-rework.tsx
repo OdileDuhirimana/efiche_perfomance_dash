@@ -1,10 +1,3 @@
-/**
- * Quality & Rework section
- * Displays:
- * - QA vs Failed QA chart (per sprint)
- * - Lead Time Trend chart (weekly average, target: ≤20 days)
- * - Rework Ratio chart (clean delivery vs rework, target: ≤10%)
- */
 "use client";
 
 import { useState } from "react";
@@ -44,7 +37,6 @@ export default function Quality_Rework() {
   const leadTimeTrendData = data?.leadTimeTrend || [];
   const reworkRatioData = data?.reworkRatio || [];
 
-  // Don't show section if no data
   if (qaVsFailedData.length === 0 && leadTimeTrendData.length === 0 && reworkRatioData.length === 0) {
     return null;
   }
@@ -63,7 +55,6 @@ export default function Quality_Rework() {
   };
 
   const handleMaximizeClick = () => {
-    // Show all charts in fullscreen
     if (qaVsFailedData.length > 0 || leadTimeTrendData.length > 0 || reworkRatioData.length > 0) {
       setShowFullscreen(true);
     }
@@ -174,7 +165,7 @@ export default function Quality_Rework() {
           {/* QA vs Failed Chart */}
           {qaVsFailedData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">QA vs Failed QA (per sprint)</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">QA vs Failed QA (per week)</h3>
               <div className="h-[500px]">
                 <QAVsFailedChart data={qaVsFailedData} height={500} />
               </div>

@@ -9,10 +9,8 @@ def get_week_date_range(week_str):
     """
     Convert week string to date range.
     
-    Logic: Parses week string in format 'YYYY-WW', calculates start of week (Monday) and end of week (Sunday)
     using datetime.strptime with ISO week format. Returns formatted date range string.
     
-    Use: Used in prepare_dashboard_data to create human-readable week date ranges for display in charts.
     
     Args:
         week_str: Week string in format 'YYYY-WW' (e.g., '2024-15')
@@ -35,13 +33,11 @@ def clean_jira_data(df):
     """
     Clean and prepare Jira data for dashboard.
     
-    Logic: Filters DataFrame to keep only relevant columns (core, sprint, changelog, metadata). Removes issues
     without keys. Fills missing assignees with 'Unassigned'. Converts all date columns to UTC datetime.
     Adds 'Status Category (Mapped)' by mapping Status using map_status_to_category. Calculates Lead Time (Days)
     as (Resolved - Created) in days. Converts numpy types to native Python types. Validates critical columns
     and changelog data availability.
     
-    Use: Called by data cache after fetching JIRA data to standardize format, ensure UTC timezones, and prepare
     data for chart calculations.
     
     Args:
@@ -200,11 +196,9 @@ def prepare_dashboard_data(df):
     """
     Prepare data for dashboard display.
     
-    Logic: Adds week labels (YYYY-WW format) and date range strings for Created, Updated, and Resolved columns.
     Ensures 'Status Category (Mapped)' exists (adds if missing for backward compatibility). Returns empty DataFrame
     with required columns if input is empty.
     
-    Use: Called after clean_jira_data to add display-friendly week labels and date ranges for frontend charts.
     
     Args:
         df: Cleaned DataFrame from clean_jira_data

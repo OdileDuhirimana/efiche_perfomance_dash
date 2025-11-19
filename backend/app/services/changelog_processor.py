@@ -8,11 +8,9 @@ def extract_status_transitions(changelog: Dict, issue_key: str) -> List[Dict]:
     """
     Extract all status transitions from a changelog.
     
-    Logic: Iterates through changelog histories, extracts status field changes (where field == "status").
     For each status change, creates transition dict with issue_key, timestamp, from_status, to_status, and author.
     Sorts transitions by timestamp and returns list.
     
-    Use: Used in data_fetcher to parse JIRA changelog data into structured transition format for analysis.
     
     Args:
         changelog: JIRA changelog dictionary with histories
@@ -55,10 +53,8 @@ def analyze_qa_transitions(transitions: List[Dict]) -> Dict:
     """
     Analyze transitions to identify QA-related patterns.
     
-    Logic: Tracks transitions where issues enter QA (to_status contains qa/testing/review keywords) and fail QA
     (from_status is QA and to_status is dev/in progress/to do). Returns counts and lists of entered_qa and failed_qa transitions.
     
-    Use: Used in calculate_qa_vs_failed chart to count QA executed and failed QA metrics.
     
     Args:
         transitions: List of status transition dictionaries
@@ -103,11 +99,9 @@ def analyze_rework_patterns(transitions: List[Dict]) -> Dict:
     """
     Analyze transitions to identify rework patterns.
     
-    Logic: Defines workflow progression order (backlog=0, to do=1, in progress=2, qa=3, ready for deployment=4, done=5, closed=6).
     For each transition, calculates workflow positions of from_status and to_status. Detects rework when to_pos < from_pos
     (moving backward in workflow). Returns rework count, transitions list, and has_rework flag.
     
-    Use: Used in calculate_rework_ratio chart to detect backward workflow movements indicating rework.
     
     Args:
         transitions: List of status transition dictionaries
@@ -137,11 +131,9 @@ def analyze_rework_patterns(transitions: List[Dict]) -> Dict:
         """
         Get workflow position for a status.
         
-        Logic: Maps status string to workflow position by checking if workflow_order keys are in status (case-insensitive).
-        Returns 0 for unknown statuses.
+            Returns 0 for unknown statuses.
         
-        Use: Internal helper to determine workflow progression level of a status.
-        
+            
         Args:
             status: Status string
         
@@ -184,11 +176,9 @@ def map_status_to_category(status: str, from_status: str = None) -> str:
     """
     Map Jira status to one of 4 categories: Not Done, In Progress, In QA, or Done.
     
-    Logic: Converts status to lowercase and checks against keyword lists. Special handling: Bug Fix from QA is treated as In Progress (rework).
     Maps statuses to categories: qa/testing/review -> In QA, to do/backlog/open -> Not Done, in progress/development -> In Progress,
     done/closed/resolved -> Done. Returns 'Not Done' as default for unknown statuses.
     
-    Use: Used throughout chart calculations to standardize status values for filtering and categorization.
     
     Args:
         status: JIRA status string
@@ -227,12 +217,10 @@ def calculate_lead_time_from_transitions(transitions: List[Dict], created_date: 
     """
     Calculate lead time metrics from changelog transitions.
     
-    Logic: If no transitions, falls back to simple created -> resolved calculation. Otherwise finds work start date
     (first work-related status transition), calculates time between transitions, tracks time in each status/category,
     calculates time from last transition to resolved. Computes total lead time from work start to resolved,
     time in progress, time in QA, and time to first progress. Returns comprehensive metrics dictionary.
     
-    Use: Used in executive summary and metrics calculations to compute accurate lead time from actual work start,
     not just creation date.
     
     Args:
@@ -423,10 +411,8 @@ def get_status_at_date(transitions: List[Dict], target_date: datetime) -> Option
     """
     Get the status of an issue at a specific date.
     
-    Logic: Iterates transitions in reverse order, finds last transition before or at target_date, returns its to_status.
     If no transitions before target_date, returns first transition's from_status. Returns None if no transitions.
     
-    Use: Used in weekly flow calculations to determine issue status at week boundaries for accurate state tracking.
     
     Args:
         transitions: List of status transition dictionaries sorted by timestamp
@@ -456,9 +442,7 @@ def is_in_progress_at_date(transitions: List[Dict], target_date: datetime) -> bo
     """
     Check if issue was in progress at a specific date.
     
-    Logic: Gets status at target_date using get_status_at_date, checks if status contains "in progress" or "development" keywords.
     
-    Use: Used in weekly flow calculations to determine if issue was actively being worked on at a specific point in time.
     
     Args:
         transitions: List of status transition dictionaries
@@ -479,10 +463,8 @@ def was_completed_during_period(transitions: List[Dict], start_date: datetime, e
     """
     Check if issue was completed (moved to Done) during a specific period.
     
-    Logic: Iterates transitions, checks if any transition timestamp falls within period (start_date <= trans_date <= end_date)
     and to_status contains done/resolved/closed keywords. Returns True if such transition found.
     
-    Use: Used in weekly flow calculations to determine if issue was completed during a specific week.
     
     Args:
         transitions: List of status transition dictionaries
@@ -509,10 +491,8 @@ def is_active_status(status: str) -> bool:
     """
     Check if a status represents active work (not done, not backlog).
     
-    Logic: Excludes done states (done/resolved/closed/deployed/completed) and initial backlog states (backlog/new/open).
     Returns True for all other statuses (in progress, qa, etc.).
     
-    Use: Used in weekly flow calculations to determine if issue is in active work state (not completed, not in initial backlog).
     
     Args:
         status: Status string to check

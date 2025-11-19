@@ -37,6 +37,10 @@ export default function TaskLoadChart({
   // Sort data by tasks descending
   const sortedData = [...data].sort((a, b) => b.tasks - a.tasks);
 
+  // Calculate dynamic X-axis domain (since it's horizontal bar chart)
+  const maxValue = Math.max(...data.map(d => d.tasks || 0));
+  const xAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10; // Add 15% padding, minimum 10
+
   return (
     <div className="w-full">
       <ResponsiveContainer width="100%" height={height}>
@@ -50,6 +54,7 @@ export default function TaskLoadChart({
             type="number"
             tick={{ fill: "#6b7280", fontSize: 12 }}
             axisLine={{ stroke: "#e5e7eb" }}
+            domain={[0, xAxisMax]}
           />
           <YAxis
             type="category"

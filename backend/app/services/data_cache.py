@@ -9,10 +9,8 @@ def _ensure_data_format(df):
     """
     Ensure DataFrame date columns are properly formatted as UTC datetime.
     
-    Logic: Converts date columns to datetime if not already, ensures UTC timezone (localizes if None, converts if different).
     Converts Primary Sprint Id to int or None. Returns empty DataFrame as-is.
     
-    Use: Internal helper to standardize data format before caching.
     
     Args:
         df: DataFrame with issues
@@ -49,10 +47,8 @@ def _ensure_sprints_format(df_sprints):
     """
     Ensure sprints DataFrame date columns are properly formatted as UTC datetime.
     
-    Logic: Converts sprint date columns to datetime if not already, ensures UTC timezone (localizes if None, converts if different).
     Converts Sprint Id to int or None. Returns empty DataFrame as-is.
     
-    Use: Internal helper to standardize sprints format before caching.
     
     Args:
         df_sprints: DataFrame with sprints
@@ -88,10 +84,8 @@ class DataCache:
     """
     Singleton cache for JIRA data.
     
-    Logic: Implements singleton pattern to maintain single cache instance. Stores issues and sprints DataFrames with timestamp.
     Uses lock to prevent concurrent fetches. Returns cached data if available and not forcing refresh, otherwise fetches fresh data.
     
-    Use: Used by all API endpoints to get cached JIRA data, avoiding repeated API calls.
     """
     
     _instance = None
@@ -109,11 +103,9 @@ class DataCache:
         """
         Get cached data or fetch fresh if cache is empty or force_refresh is True.
         
-        Logic: Returns cached data if exists and not forcing refresh. If lock is active, waits up to 60 seconds for completion.
-        Otherwise fetches fresh data from JIRA, cleans and formats it, then caches and returns copies.
+            Otherwise fetches fresh data from JIRA, cleans and formats it, then caches and returns copies.
         
-        Use: Called by get_cached_data() to retrieve JIRA data for chart calculations.
-        
+            
         Args:
             force_refresh: If True, force a fresh fetch even if cache exists
         
@@ -170,9 +162,7 @@ def get_cached_data(force_refresh=False):
     """
     Get cached JIRA data.
     
-    Logic: Wrapper function that calls DataCache singleton instance to get cached or fresh JIRA data.
     
-    Use: Called by all API endpoints and chart calculations to retrieve JIRA data efficiently.
     
     Args:
         force_refresh: If True, force a fresh fetch

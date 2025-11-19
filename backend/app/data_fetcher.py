@@ -15,10 +15,8 @@ def extract_description(description_field):
     """
     Extract plain text description from Jira's Atlassian Document Format.
     
-    Logic: Parses Atlassian Document Format JSON structure, extracts text content from nested content blocks.
     Iterates through content array, finds text type sub-blocks, and joins all text parts into single string.
     
-    Use: Used during JIRA data fetching to convert structured description format to plain text for storage.
     
     Args:
         description_field: Atlassian Document Format dictionary with content structure
@@ -46,10 +44,8 @@ def get_field_id_map():
     """
     Fetch custom field IDs from Jira API.
     
-    Logic: Makes GET request to JIRA /rest/api/3/field endpoint to retrieve all field definitions.
     Creates mapping dictionary from field name to field ID for custom fields like Sprint, Story Points, etc.
     
-    Use: Used during JIRA data fetching to get field IDs needed for extracting custom field values from issues.
     
     Returns:
         Dictionary mapping field names to field IDs
@@ -66,10 +62,8 @@ def get_boards():
     """
     Fetch all boards from Jira Agile API.
     
-    Logic: Makes paginated GET requests to /rest/agile/1.0/board endpoint. Handles pagination using startAt
     and maxResults parameters. Continues until all boards are fetched or error occurs.
     
-    Use: Used to get list of all boards for fetching sprints associated with each board.
     
     Returns:
         List of board dictionaries with id, name, and other board properties
@@ -103,11 +97,9 @@ def get_sprints_from_boards():
     """
     Fetch all sprints from all boards.
     
-    Logic: Gets all boards, then for each board makes paginated GET requests to /rest/agile/1.0/board/{board_id}/sprint.
     Extracts sprint details (id, name, state, dates, goal) and avoids duplicates using sprint_ids_seen set.
     Returns DataFrame with sprint information.
     
-    Use: Used to get comprehensive sprint data including dates and states for sprint filtering in chart calculations.
     
     Returns:
         DataFrame with columns: Sprint Id, Sprint Name, Sprint State, Sprint Start Date, Sprint End Date,
@@ -172,12 +164,10 @@ def fetch_jira_data():
     """
     Fetch all Jira issues and return as DataFrame.
     
-    Logic: Fetches custom field mappings, then uses /rest/api/3/search/jql endpoint with pagination to fetch all issues
     in open or closed sprints. For each issue, extracts fields, changelog, sprint information, and analyzes transitions
     for QA, rework, and lead time. Merges sprint details from Agile API. Creates Primary Sprint Id from first sprint.
     Maps status to category and converts date columns to datetime.
     
-    Use: Main function for fetching and processing JIRA issues data. Called by data cache to get fresh data.
     
     Returns:
         DataFrame with all issue fields, sprint information, transition analysis, and calculated metrics
@@ -465,10 +455,8 @@ def fetch_jira_data_with_sprints():
     """
     Fetch all Jira issues and sprints, returning both DataFrames separately.
     
-    Logic: Calls fetch_jira_data to get issues (which internally fetches sprints), then separately fetches sprints
     to return both DataFrames. This ensures sprints DataFrame is available separately for sprint filtering utilities.
     
-    Use: Called by data cache to get both issues and sprints DataFrames for chart calculations and sprint filtering.
     
     Returns:
         Tuple of (df_issues, df_sprints) DataFrames

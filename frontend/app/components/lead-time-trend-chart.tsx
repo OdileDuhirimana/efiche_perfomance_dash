@@ -37,6 +37,13 @@ export default function LeadTimeTrendChart({
     );
   }
 
+  // Calculate dynamic Y-axis domain based on data and target value
+  const maxValue = Math.max(
+    ...data.map(d => d.avgLeadTime || 0),
+    targetValue || 0
+  );
+  const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10; // Add 15% padding, minimum 10
+
   return (
     <div className="w-full">
       <ResponsiveContainer width="100%" height={height}>
@@ -56,6 +63,7 @@ export default function LeadTimeTrendChart({
             tick={{ fill: "#6b7280", fontSize: 12 }}
             axisLine={{ stroke: "#e5e7eb" }}
             width={80}
+            domain={[0, yAxisMax]}
           />
           <Tooltip
             contentStyle={{

@@ -27,7 +27,6 @@ export default function WeeklyFlowChart({
   data,
   height = 500,
 }: WeeklyFlowChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -35,6 +34,11 @@ export default function WeeklyFlowChart({
       </div>
     );
   }
+
+  const maxValue = Math.max(
+    ...data.map(d => (d.done || 0) + (d.inProgress || 0) + (d.carryOver || 0))
+  );
+  const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10;
 
   return (
     <div className="w-full">
@@ -67,6 +71,7 @@ export default function WeeklyFlowChart({
           <YAxis
             tick={{ fill: "#6b7280", fontSize: 12 }}
             axisLine={{ stroke: "#e5e7eb" }}
+            domain={[0, yAxisMax]}
           />
           <Tooltip
             contentStyle={{

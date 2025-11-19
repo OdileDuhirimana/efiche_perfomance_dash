@@ -8,11 +8,9 @@ def count_done_during_period(df: pd.DataFrame, period_start: datetime, period_en
     """
     Count issues completed during a period using resolution date AND status.
     
-    Logic: Filters issues where resolved date exists, falls within period, AND status category is 'Done'.
     Converts resolved column to datetime and checks for status column existence with fallback.
     Returns 0 if required columns don't exist.
     
-    Use: Used in chart calculations and KPIs to count done activities in a specific period.
     
     Args:
         df: DataFrame with issues
@@ -51,11 +49,9 @@ def filter_done_issues(df: pd.DataFrame, period_start: datetime, period_end: dat
     """
     Filter DataFrame to only include issues done during period.
     
-    Logic: Filters issues where resolved date exists, falls within period, AND status category is 'Done'.
     Converts resolved column to datetime and checks for status column existence with fallback.
     Returns empty DataFrame if required columns don't exist.
     
-    Use: Used in chart calculations to get DataFrame of done issues for lead time and rework analysis.
     
     Args:
         df: DataFrame with issues

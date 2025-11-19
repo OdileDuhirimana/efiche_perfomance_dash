@@ -1,11 +1,3 @@
-/**
- * Executive Summary section
- * Displays key performance indicators (KPIs):
- * - Completion Rate (target: ≥80%)
- * - Average Lead Time (target: ≤20 days)
- * - Rework Ratio (target: ≤10%)
- * - Planned and Done task counts
- */
 "use client";
 
 import { useState } from "react";
@@ -45,7 +37,6 @@ export default function ExecutiveSummary() {
     );
   }
 
-  // Don't show section if no data
   if (!data) {
     return null;
   }
@@ -94,7 +85,7 @@ export default function ExecutiveSummary() {
 
         <KPICard
           label="Avg Lead Time (days)"
-          value={avgLeadTime.toString()}
+          value={avgLeadTime.toFixed(1)}
           icon={Clock}
           variant="success"
           target={{

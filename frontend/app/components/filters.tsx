@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, RotateCcw, Filter, RefreshCw, Download, MoveRight, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, ChevronUp, RotateCcw, Filter, RefreshCw, Download, MoveRight, X, Check } from "lucide-react";
 import { useFilters } from "../contexts/FilterContext";
 
 export default function Filters() {
@@ -10,25 +10,25 @@ export default function Filters() {
   const [assignees, setAssignees] = useState<string[]>([]);
   const [issueTypes, setIssueTypes] = useState<string[]>([]);
   const [dataDateRange, setDataDateRange] = useState<{ min: string | null; max: string | null }>({ min: null, max: null });
+  const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false);
+  const assigneeDropdownRef = useRef<HTMLDivElement>(null);
   const [localFilters, setLocalFilters] = useState<{
-    assignee: string;
+    assignees: string[];
     issueType: string;
     startDate: string;
     endDate: string;
   }>({
-    assignee: filters.assignee || "",
+    assignees: filters.assignees || [],
     issueType: filters.issueType || "",
     startDate: filters.dateRange.start || "",
     endDate: filters.dateRange.end || "",
   });
 
-  // Fetch available assignees, issue types, and data date range
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8050';
         
-        // Fetch assignees from backend task load endpoint
         const taskLoadRes = await fetch(`${API_BASE_URL}/api/charts/task-load`);
         if (taskLoadRes.ok) {
           const taskLoadData = await taskLoadRes.json();
@@ -43,7 +43,6 @@ export default function Filters() {
           }
         }
 
-        // Fetch data date range
         const dateRangeRes = await fetch(`${API_BASE_URL}/api/data/date-range`);
         if (dateRangeRes.ok) {
           const dateRangeData = await dateRangeRes.json();
@@ -55,7 +54,6 @@ export default function Filters() {
           }
         }
 
-        // Use default issue types (backend doesn't have issue type endpoint yet)
         setIssueTypes(["All Types", "Bug", "Task", "Story", "Epic", "Subtask"]);
       } catch (error) {
         console.error("Error fetching filter options:", error);
@@ -67,15 +65,30 @@ export default function Filters() {
     fetchOptions();
   }, []);
 
-  // Sync local filters with context
   useEffect(() => {
     setLocalFilters({
-      assignee: filters.assignee || "",
+      assignees: filters.assignees || [],
       issueType: filters.issueType || "",
       startDate: filters.dateRange.start || "",
       endDate: filters.dateRange.end || "",
     });
   }, [filters]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (assigneeDropdownRef.current && !assigneeDropdownRef.current.contains(event.target as Node)) {
+        setIsAssigneeDropdownOpen(false);
+      }
+    };
+
+    if (isAssigneeDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isAssigneeDropdownOpen]);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -84,7 +97,7 @@ export default function Filters() {
   const handleReset = () => {
     resetFilters();
     setLocalFilters({
-      assignee: "",
+      assignees: [],
       issueType: "",
       startDate: "",
       endDate: "",
@@ -92,7 +105,6 @@ export default function Filters() {
   };
 
   const handleApply = () => {
-    // Validate date range is within available data range
     let startDate = localFilters.startDate || null;
     let endDate = localFilters.endDate || null;
     
@@ -107,26 +119,26 @@ export default function Filters() {
     }
     
     if (startDate && endDate && startDate > endDate) {
-      // Swap if start is after end
       [startDate, endDate] = [endDate, startDate];
       setLocalFilters(prev => ({ ...prev, startDate: startDate || "", endDate: endDate || "" }));
     }
     
+    const validAssignees = localFilters.assignees.filter(
+      a => a && a !== "All Assignees" && a.trim()
+    );
+    
     setFilters({
-      assignee: localFilters.assignee && localFilters.assignee !== "All Assignees" ? localFilters.assignee : null,
+      assignees: validAssignees,
       issueType: localFilters.issueType && localFilters.issueType !== "All Types" ? localFilters.issueType : null,
       dateRange: {
         start: startDate,
         end: endDate,
       },
     });
-    // Hooks will automatically refetch data when filters change
   };
 
   const handleRefresh = () => {
-    // Force refetch by updating filters (even if same)
     setFilters({ ...filters });
-    // Trigger page reload to refresh all data
     window.location.reload();
   };
 
@@ -137,14 +149,17 @@ export default function Filters() {
       
       if (filters.dateRange.start) params.append('start_date', filters.dateRange.start);
       if (filters.dateRange.end) params.append('end_date', filters.dateRange.end);
-      if (filters.assignee && filters.assignee !== "All Assignees") {
-        params.append('assignee', filters.assignee);
+      if (filters.assignees && filters.assignees.length > 0) {
+        filters.assignees.forEach(assignee => {
+          if (assignee && assignee !== "All Assignees") {
+            params.append('assignee', assignee);
+          }
+        });
       }
       if (filters.issueType && filters.issueType !== "All Types") {
         params.append('issueType', filters.issueType);
       }
 
-      // Fetch all chart data
       const endpoints = [
         '/api/charts/weekly-planned-vs-done',
         '/api/charts/weekly-flow',
@@ -179,7 +194,6 @@ export default function Filters() {
         return;
       }
 
-      // Export to CSV
       const { exportToCSV } = await import('@/lib/utils/export');
       exportToCSV(allData, 'dashboard-export');
     } catch (error) {
@@ -189,13 +203,13 @@ export default function Filters() {
   };
 
   const activeFiltersCount = [
-    filters.assignee,
+    filters.assignees.length > 0 ? filters.assignees : null,
     filters.issueType,
     filters.dateRange.start,
     filters.dateRange.end,
   ].filter(Boolean).length;
 
-  const removeFilter = (type: "assignee" | "issueType" | "dateRange") => {
+  const removeFilter = (type: "assignees" | "assignee" | "issueType" | "dateRange", value?: string) => {
     if (type === "dateRange") {
       setFilters({
         ...filters,
@@ -206,6 +220,27 @@ export default function Filters() {
         startDate: "",
         endDate: "",
       }));
+    } else if (type === "assignees" || type === "assignee") {
+      if (value) {
+        const updatedAssignees = filters.assignees.filter(a => a !== value);
+        setFilters({
+          ...filters,
+          assignees: updatedAssignees,
+        });
+        setLocalFilters(prev => ({
+          ...prev,
+          assignees: updatedAssignees,
+        }));
+      } else {
+        setFilters({
+          ...filters,
+          assignees: [],
+        });
+        setLocalFilters(prev => ({
+          ...prev,
+          assignees: [],
+        }));
+      }
     } else {
       setFilters({
         ...filters,
@@ -216,7 +251,6 @@ export default function Filters() {
         [type]: "",
       });
     }
-    // Hooks will automatically refetch data when filters change
   };
 
   return (
@@ -274,24 +308,77 @@ export default function Filters() {
       {isExpanded && (
         <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end">
-            {/* Assignee Filter */}
+            {/* Assignee Filter - Multi-Select Dropdown */}
             <div className="lg:col-span-3">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
-                Assignee
+                Assignee(s)
+                {localFilters.assignees.length > 0 && (
+                  <span className="text-xs font-normal text-blue-600">
+                    ({localFilters.assignees.length} selected)
+                  </span>
+                )}
               </label>
-              <div className="relative">
-                <select
-                  value={localFilters.assignee}
-                  onChange={(e) => setLocalFilters({ ...localFilters, assignee: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
+              <div className="relative" ref={assigneeDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsAssigneeDropdownOpen(!isAssigneeDropdownOpen)}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm flex items-center justify-between min-h-[48px]"
                 >
-                  <option value="">Select Assignee(s)</option>
-                  {assignees.map((assignee) => (
-                    <option key={assignee} value={assignee === "All Assignees" ? "" : assignee}>
-                      {assignee}
-                    </option>
-                  ))}
-                </select>
+                  <span className="text-left flex-1 truncate">
+                    {localFilters.assignees.length === 0
+                      ? 'Select assignee(s)...'
+                      : localFilters.assignees.length === 1
+                      ? localFilters.assignees[0]
+                      : `${localFilters.assignees.length} assignees selected`}
+                  </span>
+                  <ChevronDown 
+                    className={`w-4 h-4 text-gray-400 transition-transform ${isAssigneeDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                
+                {isAssigneeDropdownOpen && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                    <div className="p-2">
+                      {assignees.filter(a => a !== "All Assignees").length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-gray-500">No assignees available</div>
+                      ) : (
+                        assignees.filter(a => a !== "All Assignees").map((assignee) => {
+                          const isSelected = localFilters.assignees.includes(assignee);
+                          return (
+                            <div
+                              key={assignee}
+                              onClick={() => {
+                                if (isSelected) {
+                                  setLocalFilters({
+                                    ...localFilters,
+                                    assignees: localFilters.assignees.filter(a => a !== assignee)
+                                  });
+                                } else {
+                                  setLocalFilters({
+                                    ...localFilters,
+                                    assignees: [...localFilters.assignees, assignee]
+                                  });
+                                }
+                              }}
+                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                            >
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                isSelected 
+                                  ? 'bg-blue-600 border-blue-600' 
+                                  : 'border-gray-300 bg-white'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              <span className={`text-sm flex-1 ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+                                {assignee}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -329,12 +416,11 @@ export default function Filters() {
                   max={dataDateRange.max || undefined}
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Validate against data range
                     if (dataDateRange.min && value < dataDateRange.min) {
-                      return; // Don't update if outside range
+                      return;
                     }
                     if (dataDateRange.max && value > dataDateRange.max) {
-                      return; // Don't update if outside range
+                      return;
                     }
                     setLocalFilters({ ...localFilters, startDate: value });
                   }}
@@ -350,12 +436,11 @@ export default function Filters() {
                   max={dataDateRange.max || undefined}
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Validate against data range
                     if (dataDateRange.min && value < dataDateRange.min) {
-                      return; // Don't update if outside range
+                      return;
                     }
                     if (dataDateRange.max && value > dataDateRange.max) {
-                      return; // Don't update if outside range
+                      return;
                     }
                     setLocalFilters({ ...localFilters, endDate: value });
                   }}
@@ -388,16 +473,20 @@ export default function Filters() {
             <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
               <span className="text-xs font-medium text-gray-600">Active filters:</span>
               <div className="flex items-center gap-2 flex-wrap">
-                {filters.assignee && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
-                    Assignee: {filters.assignee}
-                    <button
-                      onClick={() => removeFilter("assignee")}
-                      className="hover:bg-blue-100 rounded p-0.5 transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
+                {filters.assignees && filters.assignees.length > 0 && (
+                  <>
+                    {filters.assignees.map((assignee) => (
+                      <span key={assignee} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
+                        Assignee: {assignee}
+                        <button
+                          onClick={() => removeFilter("assignees", assignee)}
+                          className="hover:bg-blue-100 rounded p-0.5 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </>
                 )}
                 {filters.issueType && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">

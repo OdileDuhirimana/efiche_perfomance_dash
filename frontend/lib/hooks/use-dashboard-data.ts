@@ -32,9 +32,6 @@ interface CompanyTrendData {
   completionRate: number;
 }
 
-/**
- * Hook for fetching throughput data (Planned vs Done and Weekly Flow)
- */
 export function useThroughputData(weeks: number = 12) {
   const { filters } = useFilters();
   const [data, setData] = useState<ThroughputData | null>(null);
@@ -46,20 +43,19 @@ export function useThroughputData(weeks: number = 12) {
       try {
         setLoading(true);
         
-        // Fetch both charts in parallel with filters
         const [plannedVsDoneRes, weeklyFlowRes] = await Promise.all([
           getWeeklyPlannedVsDone(
             weeks,
             filters.dateRange.start || undefined,
             filters.dateRange.end || undefined,
-            filters.assignee || undefined,
+            filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
             filters.issueType || undefined
           ),
           getWeeklyFlow(
             weeks,
             filters.dateRange.start || undefined,
             filters.dateRange.end || undefined,
-            filters.assignee || undefined,
+            filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
             filters.issueType || undefined
           ),
         ]);
@@ -71,7 +67,6 @@ export function useThroughputData(weeks: number = 12) {
           throw new Error(weeklyFlowRes.error || "Failed to fetch weekly flow data");
         }
 
-        // Format week labels: extract week number from full label (e.g., "W01" from "W01 (Jan 01 - Jan 07)")
         const formatWeekLabel = (label: string): string => {
           if (!label) return '';
           const match = label.match(/W(\d+)/);
@@ -81,7 +76,6 @@ export function useThroughputData(weeks: number = 12) {
           return label;
         };
 
-        // Transform backend data to component format (preserve all weeks, even with zero values)
         const plannedVsDone = (plannedVsDoneRes.data || []).map((item: any) => {
           if (!item) return { week: '', planned: 0, done: 0 };
           return {
@@ -89,7 +83,7 @@ export function useThroughputData(weeks: number = 12) {
             planned: Number(item['Planned'] ?? 0) || 0,
             done: Number(item['Done'] ?? 0) || 0,
           };
-        }).filter(item => item.week); // Filter out empty weeks
+        }).filter(item => item.week);
 
         const weeklyFlow = (weeklyFlowRes.data || []).map((item: any) => {
           if (!item) return { week: '', done: 0, inProgress: 0, carryOver: 0 };
@@ -99,7 +93,7 @@ export function useThroughputData(weeks: number = 12) {
             inProgress: Number(item['In Progress'] ?? 0) || 0,
             carryOver: Number(item['Carry Over'] ?? 0) || 0,
           };
-        }).filter(item => item.week); // Filter out empty weeks
+        }).filter(item => item.week);
 
         setData({
           plannedVsDone,
@@ -115,14 +109,11 @@ export function useThroughputData(weeks: number = 12) {
     };
 
     fetchData();
-  }, [weeks, filters.assignee, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
+  }, [weeks, filters.assignees, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
 
   return { data, loading, error };
 }
 
-/**
- * Hook for fetching ownership data (Task Load and Execution Success)
- */
 export function useOwnershipData() {
   const { filters } = useFilters();
   const [data, setData] = useState<OwnershipData | null>(null);
@@ -134,18 +125,17 @@ export function useOwnershipData() {
       try {
         setLoading(true);
         
-        // Fetch both charts in parallel with filters
         const [taskLoadRes, executionSuccessRes] = await Promise.all([
           getTaskLoad(
             filters.dateRange.start || undefined,
             filters.dateRange.end || undefined,
-            filters.assignee || undefined,
+            filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
             filters.issueType || undefined
           ),
           getExecutionSuccess(
             filters.dateRange.start || undefined,
             filters.dateRange.end || undefined,
-            filters.assignee || undefined,
+            filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
             filters.issueType || undefined
           ),
         ]);
@@ -157,7 +147,6 @@ export function useOwnershipData() {
           throw new Error(executionSuccessRes.error || "Failed to fetch execution success data");
         }
 
-        // Transform task load data
         const taskLoad = (taskLoadRes.data || []).map((item: any) => {
           if (!item) return { assignee: 'Unknown', tasks: 0 };
           return {
@@ -166,7 +155,6 @@ export function useOwnershipData() {
           };
         }).filter(item => item.assignee && item.assignee !== 'Unknown');
 
-        // Transform execution success data
         const executionSuccess = (executionSuccessRes.data || []).map((item: any) => {
           if (!item) return { assignee: 'Unknown', successRate: 0 };
           return {
@@ -175,11 +163,10 @@ export function useOwnershipData() {
           };
         }).filter(item => item.assignee && item.assignee !== 'Unknown');
 
-        // Create performance data (trend removed - set to 0 as placeholder)
         const performanceData = executionSuccess.map((item: any) => ({
           name: String(item.assignee || 'Unknown'),
           successRate: Number(item.successRate || 0),
-          trend: 0, // Placeholder - trend calculation removed
+          trend: 0,
         }));
 
         setData({
@@ -197,14 +184,11 @@ export function useOwnershipData() {
     };
 
     fetchData();
-  }, [filters.assignee, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
+  }, [filters.assignees, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
 
   return { data, loading, error };
 }
 
-/**
- * Hook for fetching company trend data
- */
 export function useCompanyTrend(months: number = 6) {
   const { filters } = useFilters();
   const [data, setData] = useState<CompanyTrendData[] | null>(null);
@@ -219,7 +203,7 @@ export function useCompanyTrend(months: number = 6) {
           months,
           filters.dateRange.start || undefined,
           filters.dateRange.end || undefined,
-          filters.assignee || undefined,
+          filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
           filters.issueType || undefined
         );
 
@@ -227,11 +211,7 @@ export function useCompanyTrend(months: number = 6) {
           throw new Error(result.error || "Failed to fetch company trend data");
         }
 
-        // Transform data to match component expectations - ensure all months are included
         const transformedData = (result.data || []).map((item: any) => {
-          // Backend returns 'Month' for month identifier
-          // Prioritize per-month fields: 'Average Lead Time (days)' and 'Completion Rate (%)'
-          // Fallback to overall averages only if per-month values are missing
           const month = item['Month'] || '';
           const avgLeadTime = Number(item['Average Lead Time (days)'] ?? item['Overall Avg Lead Time (days)'] ?? 0);
           const completionRate = Number(item['Completion Rate (%)'] ?? item['Overall Avg Completion (%)'] ?? 0);
@@ -254,15 +234,11 @@ export function useCompanyTrend(months: number = 6) {
     };
 
     fetchData();
-  }, [months, filters.assignee, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
+  }, [months, filters.assignees, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
 
   return { data, loading, error };
 }
 
-/**
- * Hook for fetching executive summary data
- * Uses the dedicated /api/executive-summary endpoint for accurate period-based calculations
- */
 export function useExecutiveSummary() {
   const { filters } = useFilters();
   const [data, setData] = useState<{
@@ -280,12 +256,10 @@ export function useExecutiveSummary() {
       try {
         setLoading(true);
         
-        // Use the dedicated executive summary endpoint
-        // This calculates metrics for the FULL selected period, not just latest week
         const response = await getExecutiveSummary(
           filters.dateRange.start || undefined,
           filters.dateRange.end || undefined,
-          filters.assignee || undefined,
+          filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
           filters.issueType || undefined
         );
 
@@ -294,11 +268,8 @@ export function useExecutiveSummary() {
         }
 
         const summaryData = response.data;
-        
-        // Convert rework_ratio from decimal (0-1) to percentage (0-100)
         const reworkRatioPercent = (summaryData.rework_ratio || 0) * 100;
 
-        // Round to 1 decimal place for display
         setData({
           completionRate: Math.round((summaryData.completion_rate || 0) * 10) / 10,
           avgLeadTime: Math.round((summaryData.avg_lead_time || 0) * 10) / 10,
@@ -316,15 +287,11 @@ export function useExecutiveSummary() {
     };
 
     fetchData();
-  }, [filters.assignee, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
+  }, [filters.assignees, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
 
   return { data, loading, error };
 }
 
-/**
- * Hook for fetching quality & rework data
- * Uses weekly lead time data (QA and rework data not available in backend yet)
- */
 export function useQualityReworkData() {
   const { filters } = useFilters();
   const [data, setData] = useState<{
@@ -343,7 +310,7 @@ export function useQualityReworkData() {
           12,
           filters.dateRange.start || undefined,
           filters.dateRange.end || undefined,
-          filters.assignee || undefined,
+          filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
           filters.issueType || undefined
         );
 
@@ -351,10 +318,8 @@ export function useQualityReworkData() {
           throw new Error(result.error || "Failed to fetch lead time data");
         }
 
-        // Helper to format week labels - just show week number
         const formatWeekLabel = (label: string): string => {
           if (!label) return '';
-          // Extract just the week number (e.g., "W01" from "W01 (Jan 01 - Jan 07)")
           const match = label.match(/W(\d+)/);
           if (match) {
             return `W${match[1]}`;
@@ -362,7 +327,6 @@ export function useQualityReworkData() {
           return label;
         };
 
-        // Transform lead time data - handle null values properly, keep all weeks even with 0 lead time
         const leadTimeTrend = (result.data || []).map((item: any) => {
           if (!item) return { week: '', avgLeadTime: 0 };
           const leadTime = item['Average Lead Time (days)'] ?? item['Average Lead Time (Days)'] ?? 0;
@@ -371,10 +335,8 @@ export function useQualityReworkData() {
             week: weekLabel,
             avgLeadTime: leadTime !== null && !isNaN(leadTime) ? Number(leadTime) : 0,
           };
-        }).filter(item => item.week); // Filter out empty weeks
+        }).filter(item => item.week);
 
-        // Fetch QA vs Failed and Rework Ratio data
-        // Use Promise.allSettled to prevent one failure from breaking the other
         let qaVsFailed: Array<{ sprint: string; qaExecuted: number; failedQA: number }> = [];
         let reworkRatio: Array<{ week: string; cleanDelivery: number; rework: number }> = [];
 
@@ -383,23 +345,21 @@ export function useQualityReworkData() {
             getQAVsFailed(
               filters.dateRange.start || undefined,
               filters.dateRange.end || undefined,
-              filters.assignee || undefined,
+              filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
               filters.issueType || undefined,
-              'sprint' // Group by sprint
+              'week' // Group by week
             ),
             getReworkRatio(
               12,
               filters.dateRange.start || undefined,
               filters.dateRange.end || undefined,
-              filters.assignee || undefined,
+              filters.assignees && filters.assignees.length > 0 ? filters.assignees : undefined,
               filters.issueType || undefined
             ),
           ]);
 
-          // Transform QA vs Failed data
           if (qaVsFailedRes.status === 'fulfilled' && qaVsFailedRes.value.success && qaVsFailedRes.value.data) {
             qaVsFailed = (qaVsFailedRes.value.data || []).map((item: any) => {
-              // Backend returns 'sprint' or 'sprintName' for sprint grouping, 'week' or 'weekLabel' for week grouping
               const sprintOrWeek = item['sprint'] || item['sprintName'] || item['week'] || item['weekLabel'] || '';
               return {
                 sprint: sprintOrWeek,
@@ -411,11 +371,8 @@ export function useQualityReworkData() {
             console.warn("QA vs Failed endpoint error (continuing without it):", qaVsFailedRes.reason);
           }
 
-          // Transform rework ratio data
           if (reworkRatioRes.status === 'fulfilled' && reworkRatioRes.value.success && reworkRatioRes.value.data) {
             reworkRatio = (reworkRatioRes.value.data || []).map((item: any) => {
-              // Backend returns 'Week Label' or 'week' for week identifier
-              // Backend returns cleanDelivery and rework as ratios (0-1), chart expects same format
               const weekLabel = formatWeekLabel(item['Week Label'] || item['week'] || item['Week'] || '');
               return {
                 week: weekLabel,
@@ -427,7 +384,6 @@ export function useQualityReworkData() {
             console.warn("Rework Ratio endpoint error (continuing without it):", reworkRatioRes.reason);
           }
         } catch (apiError) {
-          // If new endpoints fail, continue with empty arrays (graceful degradation)
           console.warn("QA/Rework data not available (this is OK):", apiError);
         }
 
@@ -446,7 +402,7 @@ export function useQualityReworkData() {
     };
 
     fetchData();
-  }, [filters.assignee, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
+  }, [filters.assignees, filters.issueType, filters.dateRange.start, filters.dateRange.end]);
 
   return { data, loading, error };
 }

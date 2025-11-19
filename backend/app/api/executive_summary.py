@@ -8,26 +8,11 @@ from app.services.data_cache import get_cached_data
 from app.services.resolution_utils import count_done_during_period
 from app.services.changelog_processor import calculate_lead_time_from_transitions, analyze_rework_patterns
 from app.services.filters import filter_by_overall_window, filter_planned_activities, apply_standard_filters
-from app.services.sprint_utils import get_active_sprint_ids_for_period
 from app.services.transitions_helper import pre_parse_transitions
 
 
 def _parse_date(date_str, default=None):
-    """
-    Parse date string to UTC datetime.
-    
-    Logic: Tries multiple date formats: ISO format (with Z replacement), '%d-%m-%Y', '%d/%m/%Y', '%Y-%m-%d'.
-    Ensures timezone is UTC (localizes if None). Returns default on parse failure.
-    
-    Use: Used in API endpoints to parse date query parameters from various formats.
-    
-    Args:
-        date_str: Date string in various formats
-        default: Default value to return on parse failure
-    
-    Returns:
-        UTC timezone-aware datetime or default
-    """
+    """Parse date string to UTC datetime. Supports multiple formats."""
     if not date_str:
         return default
     
@@ -61,21 +46,7 @@ def _parse_date(date_str, default=None):
 
 
 def _validate_date_range(start_date, end_date=None):
-    """
-    Validate date range and ensure logical ordering.
-    
-    Logic: Swaps dates if end_date < start_date. Ensures end_date includes full day (23:59:59) if at midnight.
-    Ensures start_date starts at beginning of day (00:00:00). Does NOT clamp future dates.
-    
-    Use: Used in API endpoints to normalize and validate date ranges from query parameters.
-    
-    Args:
-        start_date: Start datetime
-        end_date: Optional end datetime
-    
-    Returns:
-        Tuple of (start_date, end_date) with validated and normalized dates
-    """
+    """Validate and normalize date range."""
     if start_date is None:
         return None, None
     
@@ -93,31 +64,22 @@ def _validate_date_range(start_date, end_date=None):
 
 
 def get_executive_summary():
-    """
-    Get Executive Summary KPIs.
-    
-    IMPORTANT: Uses apply_standard_filters() to ensure data consistency with all other endpoints.
-    Both planned and done calculations use the same filtered sprint_filtered_issues dataset to guarantee consistency.
-    
-    Logic: Retrieves cached data, parses query parameters (period dates, assignee, issue type). 
-    Applies standard filters (assignee, issue_type, date window) using apply_standard_filters().
-    Applies global sprint filter to get issues in active sprints during period. 
-    Calculates planned (Created OR Updated in period) and done (Resolved in period AND Status == 'Done') 
-    from the SAME filtered dataset. Calculates completion rate, average lead time (Resolved - Created for tasks with Lead Time > 0),
-    and rework ratio (using changelog transitions with pre_parse_transitions for consistency with rework ratio chart). 
-    Returns JSON response with KPIs.
-    
-    Use: API endpoint for executive summary dashboard showing high-level KPIs for selected period.
-    
-    Returns:
-        JSON response with completion_rate, avg_lead_time, rework_ratio, planned, done counts
-    """
+    """Get Executive Summary KPIs. Uses apply_standard_filters() for data consistency."""
     try:
         df, df_sprints = get_cached_data()
         
         period_start_str = request.args.get('start_date') or request.args.get('period_start')
         period_end_str = request.args.get('end_date') or request.args.get('period_end')
-        assignee = request.args.get('assignee')
+        assignees = request.args.getlist('assignee')
+        if not assignees:
+            single_assignee = request.args.get('assignee')
+            if single_assignee:
+                assignees = [single_assignee]
+            else:
+                assignees = None
+        if assignees:
+            valid_assignees = [a for a in assignees if a and a.strip() and a != "All Assignees"]
+            assignees = valid_assignees if valid_assignees else None
         issue_type = request.args.get('issueType')
         
         if period_start_str and period_end_str:
@@ -137,25 +99,18 @@ def get_executive_summary():
             period_end = period_end.replace(hour=23, minute=59, second=59, microsecond=999999)
             period_start, period_end = _validate_date_range(period_start, period_end)
         
-        df = apply_standard_filters(df, assignee=assignee, issue_type=issue_type, 
+        df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
                                    start_date=period_start, end_date=period_end)
         
-        if df_sprints is not None and not df_sprints.empty:
-            active_sprint_ids = get_active_sprint_ids_for_period(period_start, period_end, df_sprints)
-            if 'Primary Sprint Id' in df.columns:
-                sprint_filtered_issues = df[df['Primary Sprint Id'].isin(active_sprint_ids)].copy()
-            else:
-                sprint_filtered_issues = df.copy()
-        else:
-            sprint_filtered_issues = df.copy()
+        filtered_issues = df.copy()
         
-        status_col = 'Status Category (Mapped)' if 'Status Category (Mapped)' in sprint_filtered_issues.columns else 'New Status Category'
+        status_col = 'Status Category (Mapped)' if 'Status Category (Mapped)' in filtered_issues.columns else 'New Status Category'
         
-        planned_issues = filter_planned_activities(sprint_filtered_issues, period_start, period_end)
+        planned_issues = filter_planned_activities(filtered_issues, period_start, period_end)
         planned = int(len(planned_issues))
         
         done = int(count_done_during_period(
-            sprint_filtered_issues, 
+            filtered_issues, 
             period_start, 
             period_end, 
             resolved_col='Resolved',
@@ -165,7 +120,7 @@ def get_executive_summary():
         
         from app.services.resolution_utils import filter_done_issues
         done_issues = filter_done_issues(
-            sprint_filtered_issues,
+            filtered_issues,
             period_start,
             period_end,
             resolved_col='Resolved',

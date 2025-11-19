@@ -6,12 +6,10 @@ def was_sprint_active_in_week_primary_only(row, week_start, week_end, df_sprints
     """
     Check if sprint was active during a week using Primary Sprint Id only.
     
-    Logic: Gets Primary Sprint Id from row. If df_sprints provided, uses sprint table dates (most accurate), otherwise falls back to issue-level dates.
     Normalizes all dates to UTC. Checks if sprint dates overlap week (sprint_start <= week_end AND sprint_end >= week_start).
     If sprint has complete date before week start, returns False. If sprint state is active/open, returns True.
     If closed but dates overlap, checks if sprint_end is within or after week.
     
-    Use: Used in weekly chart calculations to filter issues by active sprints, preventing double-counting of issues in multiple sprints.
     
     Args:
         row: Issue row with sprint information
@@ -80,10 +78,8 @@ def was_sprint_active_in_period(row, period_start, period_end, df_sprints=None):
     """
     Check if sprint was active during a period for monthly/period-based charts.
     
-    Logic: Gets Primary Sprint Id from row. If df_sprints provided, uses sprint table dates, otherwise uses issue-level dates.
     Normalizes all dates to UTC. Checks if sprint dates overlap period using overlap logic (sprint_start <= period_end AND sprint_end >= period_start).
     
-    Use: Used in period-based chart calculations (like company trend) to filter issues by active sprints during the period.
     
     Args:
         row: Issue row with sprint information
@@ -126,11 +122,9 @@ def get_active_sprint_ids_for_period(period_start, period_end, df_sprints):
     """
     Get list of active sprint IDs for a given period.
     
-    Logic: Converts sprint start/end dates to datetime. Normalizes period dates to UTC.
     Filters sprints where sprint_start <= period_end AND sprint_end >= period_start (overlap logic).
     Returns set of sprint IDs that were active during the period.
     
-    Use: Used to pre-filter issues by active sprint IDs before chart calculations, improving performance for global sprint filter.
     
     Args:
         period_start: Period start datetime (timezone-aware UTC)
@@ -162,10 +156,8 @@ def _normalize_to_utc(dt):
     """
     Normalize datetime to UTC timezone-aware.
     
-    Logic: Converts input to pandas Timestamp. If timezone exists, converts to UTC. If no timezone, assumes UTC and localizes.
     Returns None for None/NaN input.
     
-    Use: Internal helper to ensure consistent UTC timezone for date comparisons across sprint utilities.
     
     Args:
         dt: Datetime object (can be None, timezone-aware, or naive)

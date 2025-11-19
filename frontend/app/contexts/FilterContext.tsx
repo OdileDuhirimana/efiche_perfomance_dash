@@ -1,14 +1,10 @@
-/**
- * Global filter context for dashboard
- * Manages filter state (assignee, issue type, date range) that applies to all charts
- * Default date range: last 90 days (3 months)
- */
+/** Global filter context for dashboard */
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
 export interface FilterState {
-  assignee: string | null;
+  assignees: string[];
   issueType: string | null;
   dateRange: {
     start: string | null;
@@ -25,13 +21,11 @@ interface FilterContextType {
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
-// Default date range: today going back 90 days (3 months)
 const getDefaultDateRange = () => {
   const today = new Date();
   const daysAgo = new Date();
   daysAgo.setDate(today.getDate() - 90);
   
-  // Format as YYYY-MM-DD for date inputs
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
@@ -45,7 +39,7 @@ const getDefaultDateRange = () => {
 const defaultDateRange = getDefaultDateRange();
 
 const defaultFilters: FilterState = {
-  assignee: null,
+  assignees: [],
   issueType: null,
   dateRange: defaultDateRange,
 };
@@ -56,19 +50,21 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const resetFilters = () => {
     const updatedDefaultDateRange = getDefaultDateRange();
     setFilters({
-      assignee: null,
+      assignees: [],
       issueType: null,
       dateRange: updatedDefaultDateRange,
     });
   };
 
-  // Convert filter state to URL search params for API calls
-  // Excludes "All" values to avoid unnecessary filtering
   const getFilterParams = useCallback((): URLSearchParams => {
     const params = new URLSearchParams();
     
-    if (filters.assignee && filters.assignee !== "All Assignees") {
-      params.append("assignee", filters.assignee);
+    if (filters.assignees && filters.assignees.length > 0) {
+      filters.assignees.forEach(assignee => {
+        if (assignee && assignee !== "All Assignees") {
+          params.append("assignee", assignee);
+        }
+      });
     }
     
     if (filters.issueType && filters.issueType !== "All Types") {

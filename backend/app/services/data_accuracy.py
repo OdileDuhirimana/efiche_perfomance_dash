@@ -7,11 +7,9 @@ def ensure_changelog_usage(df: pd.DataFrame, calculation_type: str) -> Tuple[pd.
     """
     Ensure changelog data is used when available for maximum accuracy.
     
-    Logic: Checks if 'Status Transitions' column exists. For each issue, validates changelog data by parsing JSON.
     Counts issues with usable changelog vs fallback. Calculates changelog usage rate percentage.
     Returns DataFrame unchanged and statistics dictionary.
     
-    Use: Called before chart calculations to verify changelog data availability for accurate metrics like rework ratio and QA transitions.
     
     Args:
         df: DataFrame with issues
