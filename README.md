@@ -110,14 +110,14 @@ The frontend requires a `.env.local` file in the `frontend/` directory:
 
 The dashboard includes the following features:
 
-- **Executive Summary** - High-level KPIs including completion rate, lead time, rework ratio, planned, and done metrics
+- **Executive Summary** - High-level KPIs including completion rate, lead time, rework ratio, planned, and done metrics. KPI cards dynamically show green when targets are met.
 - **Weekly Planned vs Done** - Track how well the team meets their weekly commitments
 - **Weekly Flow Analysis** - Monitor work flow including done, in progress, and carry-over items
-- **Lead Time Metrics** - Analyze how long tasks take from start to completion
+- **Lead Time Metrics** - Analyze how long tasks take from creation to completion (calculated as Resolved Date - Created Date)
 - **Task Load per Assignee** - See work distribution across team members
 - **Execution Success Rates** - Track how often tasks are completed successfully
 - **Company-Level Trends** - View monthly trends for completion rates and lead times
-- **QA vs Failed QA Analysis** - Monitor quality assurance metrics
+- **QA vs Failed QA Analysis** - Monitor quality assurance metrics grouped by week
 - **Rework Ratio Tracking** - Identify how much work needs to be redone
 
 ## Troubleshooting

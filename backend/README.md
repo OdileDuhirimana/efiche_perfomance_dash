@@ -172,9 +172,10 @@ These files are updated each time data is fetched from Jira. You can use these C
    - Automatically refreshes when needed
 
 4. **Chart Calculations** (`chart_calculations.py`)
-   - Calculates metrics using changelog-based analysis
+   - Calculates metrics for all dashboard charts
    - Processes weekly, monthly, and trend data
    - Handles filtering and aggregation
+   - Lead time calculation uses simple date difference (Resolved - Created)
 
 5. **Status Transitions** (`transitions_helper.py`)
    - Parses Jira changelogs to track status changes

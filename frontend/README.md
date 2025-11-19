@@ -103,6 +103,7 @@ The dashboard is organized into five main sections:
 
 1. **Executive Summary**
    - High-level KPIs: completion rate, average lead time, rework ratio
+   - KPI cards show green color when targets are met
    - Planned vs done metrics
    - Quick overview of team performance
 
@@ -117,7 +118,7 @@ The dashboard is organized into five main sections:
    - Work distribution visualization
 
 4. **Quality & Rework**
-   - QA vs Failed QA analysis
+   - QA vs Failed QA analysis (grouped by week)
    - Rework ratio tracking
    - Quality metrics over time
 
