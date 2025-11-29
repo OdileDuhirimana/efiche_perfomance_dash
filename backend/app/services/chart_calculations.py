@@ -458,76 +458,46 @@ def calculate_execution_success_by_assignee(df_issues, period_start, period_end,
     period_start_utc = _normalize_date_to_utc(period_start)
     period_end_utc = _normalize_date_to_utc(period_end)
     period_issues = df_issues.copy()
-    status_col = (
-        'Status Category (Mapped)'
-        if 'Status Category (Mapped)' in period_issues.columns
-        else 'New Status Category'
-    )
 
-    planned_activities = filter_planned_activities(
-        period_issues, period_start_utc, period_end_utc
-    )
 
-    if 'Assignee' not in planned_activities.columns:
-        return pd.DataFrame(
-            columns=['Assignee', 'Total Assigned', 'Done/Ready for Deployment', 'Success Rate (%)']
-        )
+    status_col = 'Status Category (Mapped)' if 'Status Category (Mapped)' in period_issues.columns else 'New Status Category'
 
-    assigned_issues = planned_activities[planned_activities['Assignee'].notna()].copy()
-    assignee_success = []
 
-    for assignee in assigned_issues['Assignee'].unique():
-        assignee_tasks = assigned_issues[assigned_issues['Assignee'] == assignee].copy()
-        total_assigned = len(assignee_tasks)
+    planned_activities = filter_planned_activities(period_issues, period_start_utc, period_end_utc)
 
-        if 'Resolved' in assignee_tasks.columns:
-            assignee_tasks['Resolved'] = pd.to_datetime(
-                assignee_tasks['Resolved'], utc=True, errors='coerce'
+
+    if 'Assignee' in planned_activities.columns:
+        assigned_issues = planned_activities[planned_activities['Assignee'].notna()].copy()
+
+        assignee_success = []
+
+        for assignee in assigned_issues['Assignee'].unique():
+            assignee_tasks = assigned_issues[assigned_issues['Assignee'] == assignee]
+            total_assigned = len(assignee_tasks)
+
+
+            done = count_done_during_period(
+                assignee_tasks,
+                period_start_utc,
+                period_end_utc,
+                resolved_col='Resolved',
+                status_col=status_col
             )
 
-        local_status_col = status_col
-        if local_status_col not in assignee_tasks.columns:
-            if 'Status Category (Mapped)' in assignee_tasks.columns:
-                local_status_col = 'Status Category (Mapped)'
-            elif 'New Status Category' in assignee_tasks.columns:
-                local_status_col = 'New Status Category'
-            elif 'Status Category' in assignee_tasks.columns:
-                local_status_col = 'Status Category'
-            else:
-                local_status_col = None
+            success_rate = (done / total_assigned * 100) if total_assigned > 0 else 0
 
-        done_mask = False
-        if local_status_col is not None and 'Resolved' in assignee_tasks.columns:
-            done_mask = (
-                assignee_tasks['Resolved'].notna()
-                & (assignee_tasks['Resolved'] >= period_start_utc)
-                & (assignee_tasks['Resolved'] <= period_end_utc)
-                & (assignee_tasks[local_status_col] == 'Done')
-            )
+            assignee_success.append({
+                'Assignee': assignee,
+                'Total Assigned': total_assigned,
+                'Done/Ready for Deployment': done,
+                'Success Rate (%)': round(success_rate, 1)
+            })
 
-        ready_mask = False
-        if 'Status' in assignee_tasks.columns:
-            ready_mask = assignee_tasks['Status'].astype(str).str.contains(
-                'Ready for deployment', case=False, na=False
-            )
+        df_assignee_success = pd.DataFrame(assignee_success)
+        df_assignee_success = df_assignee_success.sort_values('Success Rate (%)', ascending=False).reset_index(drop=True)
+        return df_assignee_success
 
-        completed_mask = done_mask | ready_mask
-        completed_count = int(completed_mask.sum())
-
-        success_rate = (completed_count / total_assigned * 100) if total_assigned > 0 else 0
-
-        assignee_success.append({
-            'Assignee': assignee,
-            'Total Assigned': total_assigned,
-            'Done/Ready for Deployment': completed_count,
-            'Success Rate (%)': round(success_rate, 1),
-        })
-
-    df_assignee_success = pd.DataFrame(assignee_success)
-    df_assignee_success = df_assignee_success.sort_values(
-        'Success Rate (%)', ascending=False
-    ).reset_index(drop=True)
-    return df_assignee_success
+    return pd.DataFrame(columns=['Assignee', 'Total Assigned', 'Done/Ready for Deployment', 'Success Rate (%)'])
 
 
 def calculate_company_trend(df_issues, period_start, num_months=6, period_end=None, df_sprints=None):
