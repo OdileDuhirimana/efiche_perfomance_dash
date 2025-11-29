@@ -17,17 +17,17 @@ import Throughput_Predicatibility from "./throughput-predictability";
 
 export default function DashboardLayout() {
   return (
-    <main className="flex-1 lg:ml-64 p-6 lg:p-8 pt-20 lg:pt-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+    <main className="flex-1 md:ml-72 lg:ml-64 p-4 sm:p-6 md:p-7 lg:p-8 pt-20 md:pt-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen overflow-x-hidden">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
           eFiche - Performance Dashboard
         </h1>
-        <p className="text-sm lg:text-base text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Team Performance Dashboard
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
       <Filters />
       <ExecutiveSummary />
       <Throughput_Predicatibility />

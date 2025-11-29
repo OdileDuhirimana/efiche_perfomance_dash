@@ -82,29 +82,29 @@ export default function Ownership_Distribution() {
           onExportClick={handleExportClick}
           onMaximizeClick={handleMaximizeClick}
         />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Task Load Chart */}
           {taskLoadData.length > 0 && (
-            <div className="flex flex-col">
-              <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-                Task Load by Assignee
+            <div className="flex flex-col h-full">
+              <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+                <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
+                <span className="line-clamp-2 sm:line-clamp-1">Task Load by Assignee</span>
               </h3>
-              <p className="text-sm text-gray-500 mb-4 ml-3">Number of tasks assigned to each team member</p>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
+              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Number of tasks assigned to each team member</p>
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
                 <TaskLoadChart data={taskLoadData} />
               </div>
             </div>
           )}
           {/* Execution Success Chart */}
           {executionSuccessData.length > 0 && (
-            <div className="flex flex-col">
-              <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-                Execution Success by Assignee
+            <div className="flex flex-col h-full">
+              <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+                <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
+                <span className="line-clamp-2 sm:line-clamp-1">Execution Success by Assignee</span>
               </h3>
-              <p className="text-sm text-gray-500 mb-4 ml-3">Completion rate percentage per team member</p>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
+              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Completion rate percentage per team member</p>
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
                 <ExecutionSuccessChart data={executionSuccessData} />
               </div>
             </div>
@@ -115,15 +115,15 @@ export default function Ownership_Distribution() {
       {/* Detailed Performance Breakdown */}
       {performanceData.length > 0 && (
         <SectionWrapper>
-          <div className="mb-8 pb-4 border-b border-gray-200">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2 tracking-tight">
+          <div className="mb-6 sm:mb-8 pb-3 sm:pb-4 border-b border-gray-200">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2 tracking-tight">
               Detailed Performance Breakdown
             </h2>
             <p className="text-sm text-gray-600">
               Individual execution success rates
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
             {performanceData.map((member) => (
               <PerformanceCard
                 key={member.name}

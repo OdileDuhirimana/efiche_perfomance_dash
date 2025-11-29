@@ -23,8 +23,10 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 const getDefaultDateRange = () => {
   const today = new Date();
-  const daysAgo = new Date();
-  daysAgo.setDate(today.getDate() - 90);
+  const day = today.getDay();
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  const daysAgo = new Date(today);
+  daysAgo.setDate(today.getDate() - diffToMonday);
   
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];

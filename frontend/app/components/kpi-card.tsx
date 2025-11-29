@@ -24,23 +24,23 @@ export default function KPICard({
 
   return (
     <div
-      className={`rounded-xl p-6 border-b-4 shadow-md hover:shadow-lg transition-all duration-200 relative overflow-hidden ${
+      className={`rounded-xl p-4 sm:p-5 md:p-6 border-b-4 shadow-md hover:shadow-lg transition-all duration-200 relative overflow-hidden ${
         isSuccess
           ? "bg-gradient-to-br from-green-50 to-white border-b-green-600 border border-gray-200/50"
           : "bg-white border-b-blue-300 border border-gray-200/50"
       }`}
     >
       {/* Top section with label and icon */}
-      <div className="flex items-start justify-between mb-4">
-        <p className="text-sm font-semibold text-gray-700 uppercase tracking-wide">{label}</p>
-        <div className={`p-2 rounded-lg ${isSuccess ? "bg-green-100" : "bg-blue-50"}`}>
-          <Icon className={`w-5 h-5 ${iconColor}`} />
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <p className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide">{label}</p>
+        <div className={`p-1.5 sm:p-2 rounded-lg ${isSuccess ? "bg-green-100" : "bg-blue-50"}`}>
+          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
         </div>
       </div>
       
       {/* Value */}
       <p
-        className={`text-4xl lg:text-5xl font-bold mb-4 tracking-tight ${
+        className={`text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 tracking-tight ${
           isSuccess ? "text-green-600" : "text-gray-900"
         }`}
       >

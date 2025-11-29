@@ -8,7 +8,7 @@ import ScrollToTop from "./components/scroll-to-top";
 
 export default function PageLayout() {
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen flex-col lg:flex-row">
       <Sidebar />
       <DashboardLayout/>
       <ScrollToTop />

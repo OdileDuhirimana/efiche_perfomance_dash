@@ -254,16 +254,16 @@ export default function Filters() {
   };
 
   return (
-    <section className="bg-white rounded-xl border border-gray-200/50 shadow-md hover:shadow-lg transition-shadow p-6 lg:p-8">
+    <section className="bg-white rounded-xl border border-gray-200/50 shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-50 shadow-sm">
               <Filter className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 tracking-tight">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
                 Filters & Controls
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
@@ -306,10 +306,10 @@ export default function Filters() {
 
       {/* Filter Content */}
       {isExpanded && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end">
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-12 gap-4 md:gap-5 lg:gap-6 items-end">
             {/* Assignee Filter - Multi-Select Dropdown */}
-            <div className="lg:col-span-3">
+            <div className="sm:col-span-1 md:col-span-3 lg:col-span-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Assignee(s)
                 {localFilters.assignees.length > 0 && (
@@ -322,7 +322,7 @@ export default function Filters() {
                 <button
                   type="button"
                   onClick={() => setIsAssigneeDropdownOpen(!isAssigneeDropdownOpen)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm flex items-center justify-between min-h-[48px]"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm flex items-center justify-between min-h-[44px]"
                 >
                   <span className="text-left flex-1 truncate">
                     {localFilters.assignees.length === 0
@@ -383,7 +383,7 @@ export default function Filters() {
             </div>
 
             {/* Issue Type Filter */}
-            <div className="lg:col-span-3">
+            <div className="sm:col-span-1 md:col-span-3 lg:col-span-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Issue Type
               </label>
@@ -391,7 +391,7 @@ export default function Filters() {
                 <select
                   value={localFilters.issueType}
                   onChange={(e) => setLocalFilters({ ...localFilters, issueType: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
                 >
                   <option value="">Select Issue Type(s)</option>
                   {issueTypes.map((type) => (
@@ -404,11 +404,11 @@ export default function Filters() {
             </div>
 
             {/* Date Range Filter */}
-            <div className="lg:col-span-4">
+            <div className="sm:col-span-2 md:col-span-6 lg:col-span-5">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Date Range
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <input
                   type="date"
                   value={localFilters.startDate}
@@ -424,9 +424,9 @@ export default function Filters() {
                     }
                     setLocalFilters({ ...localFilters, startDate: value });
                   }}
-                  className="flex-1 min-w-0 px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
                 />
-                <span className="text-gray-400 shrink-0">
+                <span className="text-gray-400 shrink-0 self-center">
                   <MoveRight className="w-5 h-5" />
                 </span>
                 <input
@@ -444,34 +444,34 @@ export default function Filters() {
                     }
                     setLocalFilters({ ...localFilters, endDate: value });
                   }}
-                  className="flex-1 min-w-0 px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-2 border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-300 shadow-sm"
                 />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="lg:col-span-2 flex gap-2">
+            <div className="sm:col-span-2 md:col-span-6 lg:col-span-3 flex flex-col sm:flex-row gap-2">
               <button
                 onClick={handleReset}
-                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm border-2 border-transparent hover:border-gray-300 flex items-center justify-center gap-2"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm border-2 border-transparent hover:border-gray-300 flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
-                Reset
+                <span className="hidden sm:inline">Reset</span>
               </button>
               <button
                 onClick={handleApply}
-                className="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
                 <Filter className="w-4 h-4" />
-                Apply
+                <span className="hidden sm:inline">Apply</span>
               </button>
             </div>
           </div>
 
           {/* Active Filters Badge */}
           {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
-              <span className="text-xs font-medium text-gray-600">Active filters:</span>
+            <div className="flex items-start sm:items-center gap-2 pt-3 sm:pt-4 border-t border-gray-200 flex-col sm:flex-row">
+              <span className="text-xs font-medium text-gray-600 shrink-0">Active filters:</span>
               <div className="flex items-center gap-2 flex-wrap">
                 {filters.assignees && filters.assignees.length > 0 && (
                   <>

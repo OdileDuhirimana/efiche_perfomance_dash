@@ -207,7 +207,7 @@ export default function Sidebar() {
       {/* Mobile menu button*/}
       <button
         onClick={toggleMobileMenu}
-        className="lg:hidden fixed top-6 left-6 z-50 w-10 h-10 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+        className="md:hidden fixed top-6 left-6 z-50 w-10 h-10 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
         aria-label="Toggle menu"
       >
         {isMobileOpen ? (
@@ -220,7 +220,7 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/5 z-40"
+          className="md:hidden fixed inset-0 bg-black/5 z-40"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden="true"
         />
@@ -228,9 +228,9 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 md:w-72 lg:w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        } md:translate-x-0`}
         aria-label="Sidebar"
       >
         <div className="h-full flex flex-col overflow-y-auto">
@@ -266,7 +266,7 @@ export default function Sidebar() {
           </nav>
 
           {/* Quick Stats Section */}
-          <div className="px-4 py-4 bg-blue-50 rounded-lg mx-6 flex flex-col mt-3.5">
+          <div className="px-4 py-4 bg-blue-50 rounded-lg mx-4 md:mx-6 flex flex-col mt-3.5">
             <p className="text-sm font-semibold text-blue-800 mb-3">
               Quick Stats
             </p>

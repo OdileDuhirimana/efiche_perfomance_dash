@@ -71,7 +71,7 @@ export default function ExecutiveSummary() {
           onInfoClick={handleInfoClick}
           onExportClick={handleExportClick}
         />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
         <KPICard
           label="Completion Rate"
           value={`${completionRate.toFixed(1)}%`}

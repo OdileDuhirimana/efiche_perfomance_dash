@@ -70,7 +70,7 @@ export default function Company_Level_Trend() {
           <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
           Monthly Completion Rate & Average Lead Time
         </h3>
-        <p className="text-sm text-gray-500 mb-6 ml-3">Company-wide performance trends over the past 6 months</p>
+        <p className="text-sm text-gray-500 mb-4 sm:mb-6 ml-3">Company-wide performance trends over the past 6 months</p>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50">
           <CompanyTrendChart data={companyTrendData} height={500} />
         </div>

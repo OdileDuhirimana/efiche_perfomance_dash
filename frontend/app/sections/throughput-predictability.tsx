@@ -74,29 +74,29 @@ export default function Throughput_Predicatibility() {
           onExportClick={handleExportClick}
           onMaximizeClick={handleMaximizeClick}
         />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
         {/* Planned vs Done Chart */}
         {plannedVsDoneData.length > 0 && (
-          <div className="flex flex-col">
-            <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-              <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-              Planned vs Done
+          <div className="flex flex-col h-full">
+            <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+              <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
+              <span className="line-clamp-2 sm:line-clamp-1">Planned vs Done</span>
             </h3>
-            <p className="text-sm text-gray-500 mb-4 ml-3">Tasks planned versus tasks completed per week</p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
+            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Tasks planned versus tasks completed per week</p>
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
               <PlannedVsDoneChart data={plannedVsDoneData} />
             </div>
           </div>
         )}
         {/* Weekly Flow Chart */}
         {weeklyFlowData.length > 0 && (
-          <div className="flex flex-col">
-            <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-              <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
-              Weekly Flow (Done / In Progress / Carry-Over)
+          <div className="flex flex-col h-full">
+            <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+              <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
+              <span className="line-clamp-2 sm:line-clamp-1">Weekly Flow (Done / In Progress / Carry-Over)</span>
             </h3>
-            <p className="text-sm text-gray-500 mb-4 ml-3">Task status distribution across weeks</p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50 flex-1">
+            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Task status distribution across weeks</p>
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
               <WeeklyFlowChart data={weeklyFlowData} />
             </div>
           </div>
