@@ -136,7 +136,7 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
     For each week:
     - Done: Resolved during week AND Status == 'Done'
     - In Progress: Planned (Created OR Updated during week) but NOT resolved during week
-    - Carry Over: Created before week AND (Updated OR Resolved during week)
+    - Carry Over: Created before week AND Updated during week
     - New Issues: Created during the week
     
     Args:
@@ -366,9 +366,13 @@ def calculate_weekly_lead_time(df_issues, start_date, num_weeks=12, df_sprints=N
             status_col=status_col
         )
 
-        week_resolved['Created'] = pd.to_datetime(week_resolved['Created'], utc=True, errors='coerce')
-        week_resolved['Resolved'] = pd.to_datetime(week_resolved['Resolved'], utc=True, errors='coerce')
-        week_resolved['Lead Time (Days)'] = (week_resolved['Resolved'] - week_resolved['Created']).dt.days
+        if 'Lead Time (Days)' not in week_resolved.columns:
+            week_resolved['Created'] = pd.to_datetime(week_resolved['Created'], utc=True, errors='coerce')
+            week_resolved['Resolved'] = pd.to_datetime(week_resolved['Resolved'], utc=True, errors='coerce')
+            week_resolved['Lead Time (Days)'] = (
+                week_resolved['Resolved'] - week_resolved['Created']
+            ).dt.total_seconds() / (60 * 60 * 24)
+            week_resolved['Lead Time (Days)'] = week_resolved['Lead Time (Days)'].fillna(0).round(2)
 
         done_positive_lt = week_resolved[week_resolved['Lead Time (Days)'] > 0]
 
@@ -552,7 +556,14 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
     df_issues = df_issues.copy()
     df_issues['Created'] = pd.to_datetime(df_issues['Created'], utc=True, errors='coerce')
     df_issues['Resolved'] = pd.to_datetime(df_issues['Resolved'], utc=True, errors='coerce')
-    df_issues['Lead Time (days)'] = (df_issues['Resolved'] - df_issues['Created']).dt.days
+    # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
+    if 'Lead Time (Days)' in df_issues.columns:
+        df_issues['Lead Time (days)'] = df_issues['Lead Time (Days)']
+    else:
+        df_issues['Lead Time (days)'] = (
+            df_issues['Resolved'] - df_issues['Created']
+        ).dt.total_seconds() / (60 * 60 * 24)
+        df_issues['Lead Time (days)'] = df_issues['Lead Time (days)'].fillna(0).round(2)
 
 
     if period_end:
@@ -641,9 +652,15 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
 
 
 
-        month_resolved['Created'] = pd.to_datetime(month_resolved['Created'], utc=True, errors='coerce')
-        month_resolved['Resolved'] = pd.to_datetime(month_resolved['Resolved'], utc=True, errors='coerce')
-        month_resolved['Lead Time (Days)'] = (month_resolved['Resolved'] - month_resolved['Created']).dt.days
+        # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
+        # Ensure it exists, otherwise calculate it
+        if 'Lead Time (Days)' not in month_resolved.columns:
+            month_resolved['Created'] = pd.to_datetime(month_resolved['Created'], utc=True, errors='coerce')
+            month_resolved['Resolved'] = pd.to_datetime(month_resolved['Resolved'], utc=True, errors='coerce')
+            month_resolved['Lead Time (Days)'] = (
+                month_resolved['Resolved'] - month_resolved['Created']
+            ).dt.total_seconds() / (60 * 60 * 24)
+            month_resolved['Lead Time (Days)'] = month_resolved['Lead Time (Days)'].fillna(0).round(2)
 
         done_positive_lt = month_resolved[month_resolved['Lead Time (Days)'] > 0]
 

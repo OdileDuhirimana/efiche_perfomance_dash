@@ -8,6 +8,22 @@ import { Menu, X } from "lucide-react";
 import { useExecutiveSummary } from "@/lib/hooks/use-dashboard-data";
 import { useThroughputData } from "@/lib/hooks/use-dashboard-data";
 
+const sectionIdMap: Record<string, string> = {
+  'executive-summary': 'executive-summary',
+  'throughput': 'throughput-predictability',
+  'quality': 'quality-rework',
+  'ownership': 'ownership-distribution',
+  'company-trend': 'company-level',
+};
+
+const navIdMap: Record<string, string> = {
+  'executive-summary': 'executive-summary',
+  'throughput-predictability': 'throughput',
+  'quality-rework': 'quality',
+  'ownership-distribution': 'ownership',
+  'company-level': 'company-trend',
+};
+
 export default function Sidebar() {
   const [activeItem, setActiveItem] = useState("executive-summary");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -22,73 +38,108 @@ export default function Sidebar() {
   
   const isLoading = executiveLoading;
 
-  const sectionIdMap: Record<string, string> = {
-    'executive-summary': 'executive-summary',
-    'throughput': 'throughput-predictability',
-    'quality': 'quality-rework',
-    'ownership': 'ownership-distribution',
-    'company-trend': 'company-level',
-  };
-
-  const navIdMap: Record<string, string> = {
-    'executive-summary': 'executive-summary',
-    'throughput-predictability': 'throughput',
-    'quality-rework': 'quality',
-    'ownership-distribution': 'ownership',
-    'company-level': 'company-trend',
-  };
-
   useEffect(() => {
     let observer: IntersectionObserver | null = null;
     let scrollTimeout: NodeJS.Timeout;
+    let rafId: number | null = null;
     const sections = Object.keys(sectionIdMap).map(key => ({
       navId: key,
       sectionId: sectionIdMap[key],
     }));
 
-    const timeoutId = setTimeout(() => {
-      const observerOptions = {
-        root: null,
-        rootMargin: '-100px 0px -60% 0px',
-        threshold: [0, 0.1, 0.5, 1],
-      };
-      
-      const observerCallback = (entries: IntersectionObserverEntry[]) => {
-        clearTimeout(scrollTimeout);
-        
-        scrollTimeout = setTimeout(() => {
-          let maxIntersection = 0;
-          let activeSectionId = 'executive-summary';
+    const findActiveSection = (): string => {
+      const scrollPosition = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const offset = 150;
+      const checkPoint = scrollPosition + offset;
 
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && entry.intersectionRatio > maxIntersection) {
-              maxIntersection = entry.intersectionRatio;
+      let activeSectionId = 'executive-summary';
+      let minDistance = Infinity;
+      let maxVisibleRatio = 0;
+
+      sections.forEach(({ sectionId }) => {
+        const element = document.getElementById(sectionId);
+        if (!element) return;
+
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top + scrollPosition;
+        const elementBottom = elementTop + rect.height;
+        const elementHeight = rect.height;
+
+        const visibleTop = Math.max(0, rect.top);
+        const visibleBottom = Math.min(viewportHeight, rect.bottom);
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+        const visibleRatio = visibleHeight / elementHeight;
+
+        if (checkPoint >= elementTop && checkPoint < elementBottom) {
+          const distance = Math.abs(checkPoint - (elementTop + elementHeight / 2));
+          if (distance < minDistance) {
+            minDistance = distance;
+            activeSectionId = sectionId;
+          }
+        }
+
+        if (visibleRatio > maxVisibleRatio && visibleRatio > 0.1) {
+          maxVisibleRatio = visibleRatio;
+          if (minDistance === Infinity) {
+            activeSectionId = sectionId;
+          }
+        }
+      });
+
+      return activeSectionId;
+    };
+
+    const updateActiveSection = () => {
+      const activeSectionId = findActiveSection();
+      if (navIdMap[activeSectionId]) {
+        setActiveItem(navIdMap[activeSectionId]);
+      }
+    };
+
+    const handleScroll = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        updateActiveSection();
+      });
+    };
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -50% 0px',
+      threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      clearTimeout(scrollTimeout);
+      
+      scrollTimeout = setTimeout(() => {
+        let maxIntersection = 0;
+        let activeSectionId = 'executive-summary';
+
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const ratio = entry.intersectionRatio;
+            if (ratio > maxIntersection) {
+              maxIntersection = ratio;
               activeSectionId = entry.target.id;
             }
-          });
-
-          if (maxIntersection === 0) {
-            const scrollPosition = window.scrollY + 150;
-            sections.forEach(({ sectionId }) => {
-              const element = document.getElementById(sectionId);
-              if (element) {
-                const rect = element.getBoundingClientRect();
-                const elementTop = rect.top + window.scrollY;
-                const elementBottom = elementTop + rect.height;
-                
-                if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
-                  activeSectionId = sectionId;
-                }
-              }
-            });
           }
+        });
 
+        if (maxIntersection > 0.1) {
           if (navIdMap[activeSectionId]) {
             setActiveItem(navIdMap[activeSectionId]);
           }
-        }, 100);
-      };
+        } else {
+          updateActiveSection();
+        }
+      }, 50);
+    };
 
+    const setupObserver = () => {
       observer = new IntersectionObserver(observerCallback, observerOptions);
 
       sections.forEach(({ sectionId }) => {
@@ -97,29 +148,23 @@ export default function Sidebar() {
           observer!.observe(element);
         }
       });
+    };
 
-      const checkInitialSection = () => {
-        const scrollPosition = window.scrollY + 150;
-        sections.forEach(({ sectionId, navId }) => {
-          const element = document.getElementById(sectionId);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            const elementTop = rect.top + window.scrollY;
-            const elementBottom = elementTop + rect.height;
-            
-            if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
-              setActiveItem(navId);
-            }
-          }
-        });
-      };
-      
-      checkInitialSection();
-    }, 500);
+    const init = () => {
+      updateActiveSection();
+      setupObserver();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    };
+
+    const timeoutId = setTimeout(init, 100);
 
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(scrollTimeout);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('scroll', handleScroll);
       if (observer) {
         sections.forEach(({ sectionId }) => {
           const element = document.getElementById(sectionId);
@@ -129,7 +174,7 @@ export default function Sidebar() {
         });
       }
     };
-  }, []); // Run once on mount
+  }, []);
 
   const handleNavClick = (itemId: string) => {
     setActiveItem(itemId);

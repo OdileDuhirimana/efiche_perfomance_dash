@@ -91,6 +91,20 @@ def _get_assignees_from_request(request):
     return valid_assignees if valid_assignees else None
 
 
+def _get_current_week_range():
+    """Get the start (Monday) and end (Sunday) of the current week in UTC."""
+    now = datetime.now(timezone.utc)
+    # Get Monday of current week (weekday() returns 0 for Monday, 6 for Sunday)
+    days_since_monday = now.weekday()
+    week_start = now - timedelta(days=days_since_monday)
+    week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Get Sunday of current week (end of week)
+    week_end = week_start + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
+    
+    return week_start, week_end
+
+
 def _validate_date_range(start_date, end_date=None):
     """Validate and normalize date range. Ensures full day coverage."""
     if start_date is None:
@@ -188,15 +202,16 @@ def get_weekly_planned_vs_done():
         if start_date_str:
             start_date = _parse_date(start_date_str)
         else:
-            start_date = datetime.now(timezone.utc) - timedelta(weeks=num_weeks)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Default to current week
+            start_date, _ = _get_current_week_range()
         
-        end_date = None
         if end_date_str:
             end_date = _parse_date(end_date_str)
             start_date, end_date = _validate_date_range(start_date, end_date)
         else:
-            start_date, _ = _validate_date_range(start_date)
+            # Default to current week end
+            _, end_date = _get_current_week_range()
+            start_date, end_date = _validate_date_range(start_date, end_date)
         
         df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
                                    start_date=start_date, end_date=end_date)
@@ -235,15 +250,16 @@ def get_weekly_flow():
         if start_date_str:
             start_date = _parse_date(start_date_str)
         else:
-            start_date = datetime.now(timezone.utc) - timedelta(weeks=num_weeks)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Default to current week
+            start_date, _ = _get_current_week_range()
         
-        end_date = None
         if end_date_str:
             end_date = _parse_date(end_date_str)
             start_date, end_date = _validate_date_range(start_date, end_date)
         else:
-            start_date, _ = _validate_date_range(start_date)
+            # Default to current week end
+            _, end_date = _get_current_week_range()
+            start_date, end_date = _validate_date_range(start_date, end_date)
         
         df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
                                    start_date=start_date, end_date=end_date)
@@ -282,15 +298,16 @@ def get_weekly_lead_time():
         if start_date_str:
             start_date = _parse_date(start_date_str)
         else:
-            start_date = datetime.now(timezone.utc) - timedelta(weeks=num_weeks)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Default to current week
+            start_date, _ = _get_current_week_range()
         
-        end_date = None
         if end_date_str:
             end_date = _parse_date(end_date_str)
             start_date, end_date = _validate_date_range(start_date, end_date)
         else:
-            start_date, _ = _validate_date_range(start_date)
+            # Default to current week end
+            _, end_date = _get_current_week_range()
+            start_date, end_date = _validate_date_range(start_date, end_date)
         
         df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
                                    start_date=start_date, end_date=end_date)
@@ -500,15 +517,16 @@ def get_rework_ratio():
         if start_date_str:
             start_date = _parse_date(start_date_str)
         else:
-            start_date = datetime.now(timezone.utc) - timedelta(weeks=num_weeks)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Default to current week
+            start_date, _ = _get_current_week_range()
         
-        end_date = None
         if end_date_str:
             end_date = _parse_date(end_date_str)
             start_date, end_date = _validate_date_range(start_date, end_date)
         else:
-            start_date, _ = _validate_date_range(start_date)
+            # Default to current week end
+            _, end_date = _get_current_week_range()
+            start_date, end_date = _validate_date_range(start_date, end_date)
         
         df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
                                    start_date=start_date, end_date=end_date)

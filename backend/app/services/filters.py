@@ -55,7 +55,7 @@ def filter_planned_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataFram
 
 
 def filter_carry_over_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataFrame:
-    """Filter DataFrame to carry-over activities: Created before period AND (Updated OR Resolved during period)."""
+    """Filter DataFrame to carry-over activities: Created before period AND Updated during period."""
     if start_dt.tzinfo is None:
         start_dt = start_dt.replace(tzinfo=timezone.utc)
     if end_dt.tzinfo is None:
@@ -66,15 +66,10 @@ def filter_carry_over_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataF
         df['Created'] = pd.to_datetime(df['Created'], utc=True, errors='coerce')
     if 'Updated' in df.columns:
         df['Updated'] = pd.to_datetime(df['Updated'], utc=True, errors='coerce')
-    if 'Resolved' in df.columns:
-        df['Resolved'] = pd.to_datetime(df['Resolved'], utc=True, errors='coerce')
     
     carry_over_mask = (
         (df['Created'] < start_dt) &
-        (
-            ((df['Updated'] >= start_dt) & (df['Updated'] <= end_dt)) |
-            ((df['Resolved'] >= start_dt) & (df['Resolved'] <= end_dt))
-        )
+        ((df['Updated'] >= start_dt) & (df['Updated'] <= end_dt))
     )
     
     return df[carry_over_mask].copy()

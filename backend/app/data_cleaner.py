@@ -151,7 +151,8 @@ def clean_jira_data(df):
         cleaned_df['Lead Time (Days)'] = (
             cleaned_df['Resolved'] - cleaned_df['Created']
         ).dt.total_seconds() / (60 * 60 * 24)
-        cleaned_df['Lead Time (Days)'] = cleaned_df['Lead Time (Days)'].fillna(0).round(2).astype(float)
+        cleaned_df['Lead Time (Days)'].fillna(0, inplace=True)
+        cleaned_df['Lead Time (Days)'] = cleaned_df['Lead Time (Days)'].round(2)
     
     print("Converting numpy types...")
     for col in cleaned_df.columns:

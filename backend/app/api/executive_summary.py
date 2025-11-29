@@ -11,6 +11,20 @@ from app.services.filters import filter_by_overall_window, filter_planned_activi
 from app.services.transitions_helper import pre_parse_transitions
 
 
+def _get_current_week_range():
+    """Get the start (Monday) and end (Sunday) of the current week in UTC."""
+    now = datetime.now(timezone.utc)
+    # Get Monday of current week (weekday() returns 0 for Monday, 6 for Sunday)
+    days_since_monday = now.weekday()
+    week_start = now - timedelta(days=days_since_monday)
+    week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Get Sunday of current week (end of week)
+    week_end = week_start + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
+    
+    return week_start, week_end
+
+
 def _parse_date(date_str, default=None):
     """Parse date string to UTC datetime. Supports multiple formats."""
     if not date_str:
@@ -93,10 +107,8 @@ def get_executive_summary():
             
             period_start, period_end = _validate_date_range(period_start, period_end)
         else:
-            period_end = datetime.now(timezone.utc)
-            period_start = period_end - timedelta(days=30)
-            period_start = period_start.replace(hour=0, minute=0, second=0, microsecond=0)
-            period_end = period_end.replace(hour=23, minute=59, second=59, microsecond=999999)
+            # Default to current week
+            period_start, period_end = _get_current_week_range()
             period_start, period_end = _validate_date_range(period_start, period_end)
         
         df = apply_standard_filters(df, assignees=assignees, issue_type=issue_type, 
@@ -127,9 +139,15 @@ def get_executive_summary():
             status_col=status_col
         )
         
-        done_issues['Created'] = pd.to_datetime(done_issues['Created'], utc=True, errors='coerce')
-        done_issues['Resolved'] = pd.to_datetime(done_issues['Resolved'], utc=True, errors='coerce')
-        done_issues['Lead Time (Days)'] = (done_issues['Resolved'] - done_issues['Created']).dt.days
+        # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
+        # Ensure it exists, otherwise calculate it
+        if 'Lead Time (Days)' not in done_issues.columns:
+            done_issues['Created'] = pd.to_datetime(done_issues['Created'], utc=True, errors='coerce')
+            done_issues['Resolved'] = pd.to_datetime(done_issues['Resolved'], utc=True, errors='coerce')
+            done_issues['Lead Time (Days)'] = (
+                done_issues['Resolved'] - done_issues['Created']
+            ).dt.total_seconds() / (60 * 60 * 24)
+            done_issues['Lead Time (Days)'] = done_issues['Lead Time (Days)'].fillna(0).round(2)
         
         done_positive_lt = done_issues[done_issues['Lead Time (Days)'] > 0]
         
