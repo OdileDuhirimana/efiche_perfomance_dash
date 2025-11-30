@@ -21,7 +21,6 @@ export default function NavItem({ item, isActive, onClick }: NavItemProps) {
       }`}
       aria-current={isActive ? "page" : undefined}
     >
-      {/* Left icon */}
       <span
         className={`w-5 h-5 flex items-center justify-center shrink-0 ${
           isActive ? "text-white" : "text-blue-600"
@@ -30,10 +29,8 @@ export default function NavItem({ item, isActive, onClick }: NavItemProps) {
         {leftIcon}
       </span>
 
-      {/* Navigation text */}
       <span className="flex-1 text-left">{item.label}</span>
 
-      {/* Right icon */}
       {isActive?
       <span
         className="w-5 h-5 flex items-center justify-center shrink-0 text-white-400">

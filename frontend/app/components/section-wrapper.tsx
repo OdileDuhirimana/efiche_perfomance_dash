@@ -14,7 +14,7 @@ export default function SectionWrapper({
   return (
     <section
       id={id}
-      className={`bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 transition-shadow hover:shadow-lg ${className}`}
+      className={`bg-white rounded-xl shadow-md p-3 sm:p-4 md:p-6 lg:p-8 transition-shadow hover:shadow-lg ${className}`}
     >
       {children}
     </section>

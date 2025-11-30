@@ -30,24 +30,21 @@ export default function KPICard({
           : "bg-white border-b-blue-300 border border-gray-200/50"
       }`}
     >
-      {/* Top section with label and icon */}
-      <div className="flex items-start justify-between mb-3 sm:mb-4">
+      <div className="flex items-start justify-between mb-2 sm:mb-3 md:mb-4">
         <p className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide">{label}</p>
         <div className={`p-1.5 sm:p-2 rounded-lg ${isSuccess ? "bg-green-100" : "bg-blue-50"}`}>
           <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
         </div>
       </div>
       
-      {/* Value */}
       <p
-        className={`text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 tracking-tight ${
+        className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 tracking-tight ${
           isSuccess ? "text-green-600" : "text-gray-900"
         }`}
       >
         {value}
       </p>
       
-      {/* Target indicator */}
       {target && (
         <div className={`flex items-center gap-2 text-xs font-semibold ${isSuccess ? "text-green-700" : "text-gray-600"}`}>
           <CheckCircle className={`w-4 h-4 ${isSuccess ? "text-green-600" : "text-gray-400"}`} />

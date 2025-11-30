@@ -19,16 +19,15 @@ export default function SectionHeader({
   onMaximizeClick,
 }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 pb-3 sm:pb-4 border-b border-gray-200">
-      <div className="flex items-center gap-3 sm:gap-4 flex-1">
-        {/* Blue line indicator */}
-        <div className="w-1 sm:w-1.5 h-6 sm:h-8 bg-gradient-to-b from-blue-600 to-blue-500 rounded-full" />
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8 pb-2 sm:pb-3 md:pb-4 border-b border-gray-200">
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1">
+        <div className="w-0.5 sm:w-1 md:w-1.5 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-blue-600 to-blue-500 rounded-full" />
         <div className="flex-1">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">
             {title}
           </h2>
           {description && (
-            <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-1.5">{description}</p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 md:mt-1.5">{description}</p>
           )}
         </div>
       </div>

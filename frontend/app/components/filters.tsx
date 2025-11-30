@@ -254,9 +254,8 @@ export default function Filters() {
   };
 
   return (
-    <section className="bg-white rounded-xl border border-gray-200/50 shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200">
+    <section className="bg-white rounded-xl border border-gray-200/50 shadow-md hover:shadow-lg transition-shadow p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4 md:mb-6 pb-3 sm:pb-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-50 shadow-sm">
@@ -304,11 +303,9 @@ export default function Filters() {
         </div>
       </div>
 
-      {/* Filter Content */}
       {isExpanded && (
-        <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-12 gap-4 md:gap-5 lg:gap-6 items-end">
-            {/* Assignee Filter - Multi-Select Dropdown */}
+        <div className="space-y-3 sm:space-y-4 md:space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6 items-end">
             <div className="sm:col-span-1 md:col-span-3 lg:col-span-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Assignee(s)
@@ -382,7 +379,6 @@ export default function Filters() {
               </div>
             </div>
 
-            {/* Issue Type Filter */}
             <div className="sm:col-span-1 md:col-span-3 lg:col-span-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Issue Type
@@ -403,7 +399,6 @@ export default function Filters() {
               </div>
             </div>
 
-            {/* Date Range Filter */}
             <div className="sm:col-span-2 md:col-span-6 lg:col-span-5">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                 Date Range
@@ -449,7 +444,6 @@ export default function Filters() {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="sm:col-span-2 md:col-span-6 lg:col-span-3 flex flex-col sm:flex-row gap-2">
               <button
                 onClick={handleReset}
@@ -468,7 +462,6 @@ export default function Filters() {
             </div>
           </div>
 
-          {/* Active Filters Badge */}
           {activeFiltersCount > 0 && (
             <div className="flex items-start sm:items-center gap-2 pt-3 sm:pt-4 border-t border-gray-200 flex-col sm:flex-row">
               <span className="text-xs font-medium text-gray-600 shrink-0">Active filters:</span>

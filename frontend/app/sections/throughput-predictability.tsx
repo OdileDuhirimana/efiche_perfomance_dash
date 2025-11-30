@@ -1,9 +1,3 @@
-/**
- * Throughput & Predictability section
- * Displays:
- * - Planned vs Done chart
- * - Weekly Flow chart (Done, In Progress, Carry Over tasks)
- */
 "use client";
 
 import { useState } from "react";
@@ -41,7 +35,6 @@ export default function Throughput_Predicatibility() {
   const plannedVsDoneData = data?.plannedVsDone || [];
   const weeklyFlowData = data?.weeklyFlow || [];
 
-  // Don't show section if no data
   if (plannedVsDoneData.length === 0 && weeklyFlowData.length === 0) {
     return null;
   }
@@ -59,7 +52,6 @@ export default function Throughput_Predicatibility() {
   };
 
   const handleMaximizeClick = () => {
-    // Show all charts in fullscreen
     if (plannedVsDoneData.length > 0 || weeklyFlowData.length > 0) {
       setShowFullscreen(true);
     }
@@ -74,29 +66,27 @@ export default function Throughput_Predicatibility() {
           onExportClick={handleExportClick}
           onMaximizeClick={handleMaximizeClick}
         />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-        {/* Planned vs Done Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
         {plannedVsDoneData.length > 0 && (
           <div className="flex flex-col h-full">
-            <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
               <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
               <span className="line-clamp-2 sm:line-clamp-1">Planned vs Done</span>
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Tasks planned versus tasks completed per week</p>
-            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
+            <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 md:mb-4 ml-2 sm:ml-3 line-clamp-2">Tasks planned versus tasks completed per week</p>
+            <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50 flex-1 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]">
               <PlannedVsDoneChart data={plannedVsDoneData} />
             </div>
           </div>
         )}
-        {/* Weekly Flow Chart */}
         {weeklyFlowData.length > 0 && (
           <div className="flex flex-col h-full">
-            <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
               <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
               <span className="line-clamp-2 sm:line-clamp-1">Weekly Flow (Done / In Progress / Carry-Over)</span>
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Task status distribution across weeks</p>
-            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
+            <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 md:mb-4 ml-2 sm:ml-3 line-clamp-2">Task status distribution across weeks</p>
+            <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50 flex-1 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]">
               <WeeklyFlowChart data={weeklyFlowData} />
             </div>
           </div>
@@ -104,7 +94,6 @@ export default function Throughput_Predicatibility() {
       </div>
       </SectionWrapper>
 
-      {/* Info Modal */}
       <Modal
         isOpen={showInfoModal}
         onClose={() => setShowInfoModal(false)}
@@ -133,28 +122,25 @@ export default function Throughput_Predicatibility() {
         </div>
       </Modal>
 
-      {/* Fullscreen Modal - Show All Charts */}
       <Modal
         isOpen={showFullscreen}
         onClose={() => setShowFullscreen(false)}
         title="Throughput & Predictability - Full View"
         size="full"
       >
-        <div className="space-y-8">
-          {/* Planned vs Done Chart */}
+        <div className="space-y-6 sm:space-y-8">
           {plannedVsDoneData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Planned vs Done</h3>
-              <div className="h-[500px]">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Planned vs Done</h3>
+              <div className="h-[400px] sm:h-[500px]">
                 <PlannedVsDoneChart data={plannedVsDoneData} height={500} />
               </div>
             </div>
           )}
-          {/* Weekly Flow Chart */}
           {weeklyFlowData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Weekly Flow (Done / In Progress / Carry-Over)</h3>
-              <div className="h-[500px]">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Weekly Flow (Done / In Progress / Carry-Over)</h3>
+              <div className="h-[400px] sm:h-[500px]">
                 <WeeklyFlowChart data={weeklyFlowData} height={500} />
               </div>
             </div>

@@ -110,21 +110,19 @@ def analyze_rework_patterns(transitions: List[Dict]) -> Dict:
         Dictionary with rework_count, rework_transitions list, and has_rework boolean
     """
     workflow_order = {
-        "backlog": 0,
-        "to do": 1,
-        "not done": 1,
-        "in progress": 2,
-        "development": 2,
-        "dev": 2,
-        "qa": 3,
-        "testing": 3,
-        "test": 3,
-        "review": 3,
-        "in review": 3,
-        "ready for deployment": 4,
-        "done": 5,
-        "resolved": 5,
-        "closed": 6
+    "backlog": 0,
+    "to do": 1,
+    "not done": 1,
+    "in progress": 2,
+    "development": 2,
+    "dev": 2,
+    "qa": 3,
+    "testing": 3,
+    "test": 3,
+    "review": 3,
+    "in review": 3,
+    "ready for deployment": 4,
+    "done": 4, 
     }
     
     def get_workflow_position(status: str) -> int:
@@ -197,14 +195,13 @@ def map_status_to_category(status: str, from_status: str = None) -> str:
         if from_status_lower in ['qa', 'quality assurance', 'testing', 'test', 'review', 'in review', 'qa testing']:
             return 'In Progress'
     
-    if status_lower in ['qa', 'quality assurance', 'testing', 'bugfix', 
-                    'review', 'in review', 'qa testing', 'test']:
+    if status_lower in ['qa', 'quality assurance', 'testing', 'qa testing', 'test']:
         return 'In QA'
     elif status_lower in ['bug fix', 'bugfix']:
         return 'In QA'
     elif status_lower in ['to do', 'backlog', 'open', 'new', 'todo', 'not done', "won't do", "wont do"]:
         return 'Not Done'
-    elif status_lower in ['in progress', 'inprogress', 'active', 'development', 'doing']:
+    elif status_lower in ['in progress', 'inprogress', 'active', 'development', 'doing', 'review', 'in review']:
         return 'In Progress'
     elif status_lower in ['done', 'closed', 'ready for deployment', 'resolved', 'deployed', 
                     'completed', 'finished']:

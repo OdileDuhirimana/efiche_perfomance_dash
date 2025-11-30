@@ -28,7 +28,6 @@ export default function LeadTimeTrendChart({
   targetValue = 20,
   height = 500,
 }: LeadTimeTrendChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -37,12 +36,11 @@ export default function LeadTimeTrendChart({
     );
   }
 
-  // Calculate dynamic Y-axis domain based on data and target value
   const maxValue = Math.max(
     ...data.map(d => d.avgLeadTime || 0),
     targetValue || 0
   );
-  const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10; // Add 15% padding, minimum 10
+  const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10;
 
   return (
     <div className="w-full">

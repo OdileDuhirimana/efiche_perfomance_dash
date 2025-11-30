@@ -135,7 +135,8 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
     
     For each week:
     - Done: Resolved during week AND Status == 'Done'
-    - In Progress: Planned (Created OR Updated during week) but NOT resolved during week
+    - In Progress: All items in period (Created OR Updated during week) with status 'In Progress' or 'In QA'
+      (matches team-performance-dashboard approach: counts all items with status, regardless of resolution)
     - Carry Over: Created before week AND Updated during week
     - New Issues: Created during the week
     
@@ -227,20 +228,30 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
         carry_over = filter_carry_over_activities(week_issues, week_start, effective_week_end)
         carry_over_count = len(carry_over)
 
-        # In Progress: Planned (Created OR Updated during week) but NOT resolved during week
+        # In Progress: Count all items in period (Created OR Updated during week) 
+        # with status 'In Progress' or 'In QA', regardless of resolution status.
+        # This matches team-performance-dashboard approach which counts all items 
+        # in the period with the status, not just unresolved ones.
+        
         week_issues['Created'] = pd.to_datetime(week_issues['Created'], utc=True, errors='coerce')
         week_issues['Updated'] = pd.to_datetime(week_issues['Updated'], utc=True, errors='coerce')
-        week_issues['Resolved'] = pd.to_datetime(week_issues['Resolved'], utc=True, errors='coerce')
         
+        # Get all items that were Created OR Updated during the week (planned activities)
         planned_during_week = week_issues[
             ((week_issues['Created'] >= week_start) & (week_issues['Created'] <= effective_week_end)) |
             ((week_issues['Updated'] >= week_start) & (week_issues['Updated'] <= effective_week_end))
         ].copy()
         
-        in_progress = planned_during_week[
-            (planned_during_week['Resolved'].isna()) |
-            (planned_during_week['Resolved'] > effective_week_end)
-        ]
+        # Count items with status 'In Progress' or 'In QA' in the planned activities
+        # This matches team-performance-dashboard: simple count based on status category
+        if status_col in planned_during_week.columns:
+            in_progress = planned_during_week[
+                planned_during_week[status_col].isin(['In Progress', 'In QA'])
+            ]
+        else:
+            # Fallback if mapped status not available (should not happen with clean data)
+            in_progress = pd.DataFrame()
+            
         in_progress_count = len(in_progress)
 
         week_issues['Created'] = pd.to_datetime(week_issues['Created'], utc=True, errors='coerce')
@@ -509,13 +520,21 @@ def calculate_execution_success_by_assignee(df_issues, period_start, period_end,
                 & (assignee_tasks[local_status_col] == 'Done')
             )
 
-        ready_mask = False
-        if 'Status' in assignee_tasks.columns:
-            ready_mask = assignee_tasks['Status'].astype(str).str.contains(
-                'Ready for deployment', case=False, na=False
+
+        done_without_resolved = False
+        if local_status_col is not None and 'Updated' in assignee_tasks.columns:
+            assignee_tasks['Updated'] = pd.to_datetime(
+                assignee_tasks['Updated'], utc=True, errors='coerce'
+            )
+            done_without_resolved = (
+                (assignee_tasks[local_status_col] == 'Done')
+                & assignee_tasks['Resolved'].isna()  # No Resolved date
+                & assignee_tasks['Updated'].notna()
+                & (assignee_tasks['Updated'] >= period_start_utc)
+                & (assignee_tasks['Updated'] <= period_end_utc)
             )
 
-        completed_mask = done_mask | ready_mask
+        completed_mask = done_mask | done_without_resolved
         completed_count = int(completed_mask.sum())
 
         success_rate = (completed_count / total_assigned * 100) if total_assigned > 0 else 0
@@ -652,8 +671,6 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
 
 
 
-        # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
-        # Ensure it exists, otherwise calculate it
         if 'Lead Time (Days)' not in month_resolved.columns:
             month_resolved['Created'] = pd.to_datetime(month_resolved['Created'], utc=True, errors='coerce')
             month_resolved['Resolved'] = pd.to_datetime(month_resolved['Resolved'], utc=True, errors='coerce')
@@ -750,41 +767,44 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
 
                 for _, row in sprint_issues_filtered.iterrows():
                     transitions = row.get('_parsed_transitions', [])
-                    if transitions:
-                        try:
-                            if transitions:
+                    issue_type = str(row.get('Issue Type', '')).lower()
+                    is_bug = issue_type in ['bug', 'bugfix', 'bug fix']
 
+                    if is_bug:
+                        qa_executed_count += 1
+                    else:
+                        if transitions:
+                            try:
                                 qa_analysis = analyze_qa_transitions(transitions)
-
-
                                 entered_qa = qa_analysis.get('entered_qa', [])
                                 for qa_entry in entered_qa:
                                     qa_timestamp = qa_entry.get('timestamp')
                                     if qa_timestamp:
                                         try:
                                             qa_date = datetime.fromisoformat(qa_timestamp.replace('Z', '+00:00'))
-
                                             if period_start_utc <= qa_date <= period_end_utc:
                                                 qa_executed_count += 1
                                         except:
                                             pass
+                            except:
+                                pass
 
-
-                                failed_qa_list = qa_analysis.get('failed_qa', [])
-                                for qa_failure in failed_qa_list:
-                                    failure_timestamp = qa_failure.get('timestamp')
-                                    if failure_timestamp:
-                                        try:
-                                            failure_date = datetime.fromisoformat(failure_timestamp.replace('Z', '+00:00'))
-
-                                            if period_start_utc <= failure_date <= period_end_utc:
-                                                failed_qa_count += 1
-                                        except:
-                                            pass
+                    # 2. Calculate Failed QA (for ALL issues, including Bugs)
+                    if transitions:
+                        try:
+                            qa_analysis = analyze_qa_transitions(transitions)
+                            failed_qa_list = qa_analysis.get('failed_qa', [])
+                            for qa_failure in failed_qa_list:
+                                failure_timestamp = qa_failure.get('timestamp')
+                                if failure_timestamp:
+                                    try:
+                                        failure_date = datetime.fromisoformat(failure_timestamp.replace('Z', '+00:00'))
+                                        if period_start_utc <= failure_date <= period_end_utc:
+                                            failed_qa_count += 1
+                                    except:
+                                        pass
                         except:
-
                             pass
-
 
                     if 'QA Entered Count' in row and qa_executed_count == 0:
                         qa_executed_count = max(qa_executed_count, row.get('QA Entered Count', 0) or 0)
@@ -822,13 +842,34 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
 
             for _, row in week_issues.iterrows():
                 transitions = row.get('_parsed_transitions', [])
-                if transitions:
-                    try:
-                        if transitions:
+                issue_type = str(row.get('Issue Type', '')).lower()
+                is_bug = issue_type in ['bug', 'bugfix', 'bug fix']
+                
+                # Check if issue was active in this week
+                issue_created = pd.to_datetime(row.get('Created'), utc=True, errors='coerce')
+                issue_updated = pd.to_datetime(row.get('Updated'), utc=True, errors='coerce')
+                issue_resolved = pd.to_datetime(row.get('Resolved'), utc=True, errors='coerce')
+                issue_active_in_week = (
+                    (pd.notna(issue_created) and current_date <= issue_created <= week_end) or
+                    (pd.notna(issue_updated) and current_date <= issue_updated <= week_end) or
+                    (pd.notna(issue_resolved) and current_date <= issue_resolved <= week_end)
+                )
+                
+                if not issue_active_in_week:
+                    continue  
 
+                issue_qa_executed = 0
+                issue_failed_qa = 0
+
+
+                if is_bug:
+                    # Bug/BugFix issues are automatically considered as 1 QA execution
+                    issue_qa_executed = 1
+                else:
+                    # For other issues, check transitions for entering QA
+                    if transitions:
+                        try:
                             qa_analysis = analyze_qa_transitions(transitions)
-
-
                             entered_qa = qa_analysis.get('entered_qa', [])
                             for qa_entry in entered_qa:
                                 qa_timestamp = qa_entry.get('timestamp')
@@ -836,23 +877,37 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
                                     try:
                                         qa_date = datetime.fromisoformat(qa_timestamp.replace('Z', '+00:00'))
                                         if current_date <= qa_date <= week_end:
-                                            qa_executed_count += 1
+                                            issue_qa_executed += 1
                                     except:
                                         pass
+                        except:
+                            pass
+                    
+                    if issue_qa_executed == 0 and 'QA Entered Count' in row:
+                        issue_qa_executed = row.get('QA Entered Count', 0) or 0
 
-
-                            failed_qa_list = qa_analysis.get('failed_qa', [])
-                            for qa_failure in failed_qa_list:
-                                failure_timestamp = qa_failure.get('timestamp')
-                                if failure_timestamp:
-                                    try:
-                                        failure_date = datetime.fromisoformat(failure_timestamp.replace('Z', '+00:00'))
-                                        if current_date <= failure_date <= week_end:
-                                            failed_qa_count += 1
-                                    except:
-                                        pass
+                if transitions:
+                    try:
+                        qa_analysis = analyze_qa_transitions(transitions)
+                        failed_qa_list = qa_analysis.get('failed_qa', [])
+                        for qa_failure in failed_qa_list:
+                            failure_timestamp = qa_failure.get('timestamp')
+                            if failure_timestamp:
+                                try:
+                                    failure_date = datetime.fromisoformat(failure_timestamp.replace('Z', '+00:00'))
+                                    if current_date <= failure_date <= week_end:
+                                        issue_failed_qa += 1
+                                except:
+                                    pass
                     except:
                         pass
+                
+
+                if issue_failed_qa == 0 and 'QA Failed Count' in row:
+                    issue_failed_qa = row.get('QA Failed Count', 0) or 0
+                
+                qa_executed_count += issue_qa_executed
+                failed_qa_count += issue_failed_qa
 
             weeks_data.append({
                 'week': f'W{week_num:02d}',

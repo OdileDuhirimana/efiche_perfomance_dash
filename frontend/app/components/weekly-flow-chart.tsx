@@ -87,7 +87,6 @@ export default function WeeklyFlowChart({
             iconType="circle"
           />
           
-          {/* In Progress - Light Blue (bottom layer) */}
           <Area
             type="monotone"
             dataKey="inProgress"
@@ -97,7 +96,6 @@ export default function WeeklyFlowChart({
             fill="url(#colorInProgress)"
             name="In Progress"
           />
-          {/* Carry-Over - Purple/Magenta (middle layer) */}
           <Area
             type="monotone"
             dataKey="carryOver"
@@ -107,7 +105,6 @@ export default function WeeklyFlowChart({
             fill="url(#colorCarryOver)"
             name="Carry-Over"
           />
-          {/* Done - Green (top layer) */}
           <Area
             type="monotone"
             dataKey="done"

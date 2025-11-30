@@ -27,7 +27,6 @@ export default function CompanyTrendChart({
   data,
   height = 500,
 }: CompanyTrendChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -36,9 +35,8 @@ export default function CompanyTrendChart({
     );
   }
 
-  // Calculate dynamic Y-axis domain for lead time (right axis)
   const maxLeadTime = Math.max(...data.map(d => d.avgLeadTime || 0));
-  const leadTimeMax = maxLeadTime > 0 ? Math.ceil(maxLeadTime * 1.15) : 10; // Add 15% padding, minimum 10
+  const leadTimeMax = maxLeadTime > 0 ? Math.ceil(maxLeadTime * 1.15) : 10;
 
   return (
     <div className="w-full">

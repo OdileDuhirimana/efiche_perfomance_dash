@@ -28,7 +28,6 @@ export default function ExecutionSuccessChart({
   targetValue = 75,
   height = 500,
 }: ExecutionSuccessChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -37,7 +36,6 @@ export default function ExecutionSuccessChart({
     );
   }
 
-  // Sort data by success rate descending
   const sortedData = [...data].sort((a, b) => b.successRate - a.successRate);
 
   return (

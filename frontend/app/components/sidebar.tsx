@@ -1,4 +1,3 @@
-/** Sidebar navigation component */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -182,11 +181,10 @@ export default function Sidebar() {
     
     const sectionId = sectionIdMap[itemId] || itemId;
     
-    // Small delay to ensure DOM is ready
     setTimeout(() => {
       const element = document.getElementById(sectionId);
       if (element) {
-        const offset = 100; // Offset for fixed header
+        const offset = 100;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
         
@@ -204,10 +202,9 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button*/}
       <button
         onClick={toggleMobileMenu}
-        className="md:hidden fixed top-6 left-6 z-50 w-10 h-10 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+        className="md:hidden fixed top-4 left-4 sm:top-6 sm:left-6 z-50 w-10 h-10 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
         aria-label="Toggle menu"
       >
         {isMobileOpen ? (
@@ -217,7 +214,6 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* Mobile overlay */}
       {isMobileOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/5 z-40"
@@ -226,7 +222,6 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 md:w-72 lg:w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -234,14 +229,13 @@ export default function Sidebar() {
         aria-label="Sidebar"
       >
         <div className="h-full flex flex-col overflow-y-auto">
-          {/* Logo Section */}
-          <div className="px-6 py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
-                <span className="text-white font-bold text-lg">E</span>
+          <div className="px-4 sm:px-6 py-4 sm:py-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+                <span className="text-white font-bold text-base sm:text-lg">E</span>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-gray-900 leading-tight">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">
                   eFiche
                 </h2>
                 <p className="text-xs text-gray-500 leading-tight">
@@ -251,9 +245,8 @@ export default function Sidebar() {
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex px-6 py-4">
-            <div className="space-y-1">
+          <nav className="flex px-4 sm:px-6 py-3 sm:py-4">
+            <div className="space-y-1 w-full">
               {navigationItems.map((item) => (
                 <NavItem
                   key={item.id}
@@ -265,33 +258,29 @@ export default function Sidebar() {
             </div>
           </nav>
 
-          {/* Quick Stats Section */}
-          <div className="px-4 py-4 bg-blue-50 rounded-lg mx-4 md:mx-6 flex flex-col mt-3.5">
-            <p className="text-sm font-semibold text-blue-800 mb-3">
+          <div className="px-3 sm:px-4 py-3 sm:py-4 bg-blue-50 rounded-lg mx-3 sm:mx-4 md:mx-6 flex flex-col mt-2 sm:mt-3.5">
+            <p className="text-xs sm:text-sm font-semibold text-blue-800 mb-2 sm:mb-3">
               Quick Stats
             </p>
 
-            {/* Stats container */}
             <div className="flex flex-col space-y-2 w-full max-w-xs">
-              {/* Completion Rate */}
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-600 mb-1">Completion Rate</p>
                 {isLoading ? (
-                  <p className="text-sm font-semibold text-blue-600 animate-pulse">...</p>
+                  <p className="text-xs sm:text-sm font-semibold text-blue-600 animate-pulse">...</p>
                 ) : (
-                  <p className="text-sm font-semibold text-blue-600">
+                  <p className="text-xs sm:text-sm font-semibold text-blue-600">
                     {completionRate.toFixed(1)}%
                   </p>
                 )}
               </div>
 
-              {/* Active Tasks */}
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-600 mb-1">Active Tasks</p>
                 {isLoading ? (
-                  <p className="text-sm font-semibold text-blue-600 animate-pulse">...</p>
+                  <p className="text-xs sm:text-sm font-semibold text-blue-600 animate-pulse">...</p>
                 ) : (
-                  <p className="text-sm font-semibold text-blue-600">{activeTasks}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-blue-600">{activeTasks}</p>
                 )}
               </div>
             </div>

@@ -69,47 +69,43 @@ export default function Quality_Rework() {
           onExportClick={handleExportClick}
           onMaximizeClick={handleMaximizeClick}
         />
-      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-        {/* First Row: QA vs Failed and Lead Time Trend */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-          {/* QA vs Failed QA Chart */}
+      <div className="space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
           {qaVsFailedData.length > 0 && (
             <div className="flex flex-col h-full">
-              <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
                 <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
                 <span className="line-clamp-2 sm:line-clamp-1">QA vs Failed QA</span>
               </h3>
-              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Quality assurance execution and failure rates per week</p>
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
+              <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 md:mb-4 ml-2 sm:ml-3 line-clamp-2">Quality assurance execution and failure rates per week</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50 flex-1 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]">
                 <QAVsFailedChart data={qaVsFailedData} />
               </div>
             </div>
           )}
           
-          {/* Lead Time Trend Chart */}
           {leadTimeTrendData.length > 0 && (
             <div className="flex flex-col h-full">
-              <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
                 <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
                 <span className="line-clamp-2 sm:line-clamp-1">Lead Time Trend (weekly)</span>
               </h3>
-              <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Average time from start to completion per week</p>
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 flex-1 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
+              <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 md:mb-4 ml-2 sm:ml-3 line-clamp-2">Average time from start to completion per week</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50 flex-1 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]">
                 <LeadTimeTrendChart data={leadTimeTrendData} />
               </div>
             </div>
           )}
         </div>
         
-        {/* Second Row: Rework Ratio Chart (full width or centered) */}
         {reworkRatioData.length > 0 && (
           <div className="flex flex-col">
-            <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 sm:mb-1.5 flex items-center gap-2">
               <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
               <span className="line-clamp-2 sm:line-clamp-1">Rework Ratio (% of total)</span>
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 ml-2 sm:ml-3 line-clamp-2">Percentage of tasks requiring rework versus clean delivery</p>
-            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 md:p-4 border border-gray-200/50 min-h-[250px] sm:min-h-[300px] md:min-h-[350px]">
+            <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 md:mb-4 ml-2 sm:ml-3 line-clamp-2">Percentage of tasks requiring rework versus clean delivery</p>
+            <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]">
               <ReworkRatioChart data={reworkRatioData} />
             </div>
           </div>
@@ -117,7 +113,6 @@ export default function Quality_Rework() {
       </div>
       </SectionWrapper>
 
-      {/* Info Modal */}
       <Modal
         isOpen={showInfoModal}
         onClose={() => setShowInfoModal(false)}
@@ -154,37 +149,33 @@ export default function Quality_Rework() {
         </div>
       </Modal>
 
-      {/* Fullscreen Modal - Show All Charts */}
       <Modal
         isOpen={showFullscreen}
         onClose={() => setShowFullscreen(false)}
         title="Quality & Rework - Full View"
         size="full"
       >
-        <div className="space-y-8">
-          {/* QA vs Failed Chart */}
+        <div className="space-y-6 sm:space-y-8">
           {qaVsFailedData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">QA vs Failed QA (per week)</h3>
-              <div className="h-[500px]">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">QA vs Failed QA (per week)</h3>
+              <div className="h-[400px] sm:h-[500px]">
                 <QAVsFailedChart data={qaVsFailedData} height={500} />
               </div>
             </div>
           )}
-          {/* Lead Time Trend Chart */}
           {leadTimeTrendData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Time Trend (weekly)</h3>
-              <div className="h-[500px]">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Lead Time Trend (weekly)</h3>
+              <div className="h-[400px] sm:h-[500px]">
                 <LeadTimeTrendChart data={leadTimeTrendData} targetValue={20} height={500} />
               </div>
             </div>
           )}
-          {/* Rework Ratio Chart */}
           {reworkRatioData.length > 0 && (
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Rework Ratio (% of total)</h3>
-              <div className="h-[500px]">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Rework Ratio (% of total)</h3>
+              <div className="h-[400px] sm:h-[500px]">
                 <ReworkRatioChart data={reworkRatioData} height={500} />
               </div>
             </div>

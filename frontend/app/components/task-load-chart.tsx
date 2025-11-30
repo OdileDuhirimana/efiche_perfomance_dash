@@ -25,7 +25,6 @@ export default function TaskLoadChart({
   data,
   height = 500,
 }: TaskLoadChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -34,12 +33,10 @@ export default function TaskLoadChart({
     );
   }
 
-  // Sort data by tasks descending
   const sortedData = [...data].sort((a, b) => b.tasks - a.tasks);
 
-  // Calculate dynamic X-axis domain (since it's horizontal bar chart)
   const maxValue = Math.max(...data.map(d => d.tasks || 0));
-  const xAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10; // Add 15% padding, minimum 10
+  const xAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10;
 
   return (
     <div className="w-full">

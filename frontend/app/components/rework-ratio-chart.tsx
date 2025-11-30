@@ -27,7 +27,6 @@ export default function ReworkRatioChart({
   data,
   height = 350,
 }: ReworkRatioChartProps) {
-  // Handle empty data gracefully
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">

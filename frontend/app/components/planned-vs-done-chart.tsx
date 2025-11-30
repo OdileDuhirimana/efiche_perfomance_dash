@@ -73,7 +73,6 @@ export default function PlannedVsDoneChart({
             iconType="circle"
           />
           
-          {/* Bars for Planned */}
           <Bar
             dataKey="planned"
             fill="#9ca3af"
@@ -81,7 +80,6 @@ export default function PlannedVsDoneChart({
             name="Planned"
           />
           
-          {/* Line for Done */}
           <Line
             type="monotone"
             dataKey="done"

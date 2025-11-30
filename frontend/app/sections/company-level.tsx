@@ -1,9 +1,3 @@
-/**
- * Company-Level Trend section
- * Displays monthly trends over the past 6 months:
- * - Completion Rate (%)
- * - Average Lead Time (days)
- */
 "use client";
 
 import { useState } from "react";
@@ -39,7 +33,6 @@ export default function Company_Level_Trend() {
 
   const companyTrendData = data || [];
 
-  // Don't show section if no data
   if (companyTrendData.length === 0) {
     return null;
   }
@@ -66,18 +59,17 @@ export default function Company_Level_Trend() {
           onMaximizeClick={handleMaximizeClick}
         />
       <div>
-        <h3 className="text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
+        <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+          <span className="w-0.5 sm:w-1 h-3 sm:h-4 bg-blue-600 rounded-full"></span>
           Monthly Completion Rate & Average Lead Time
         </h3>
-        <p className="text-sm text-gray-500 mb-4 sm:mb-6 ml-3">Company-wide performance trends over the past 6 months</p>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200/50">
+        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 md:mb-6 ml-2 sm:ml-3">Company-wide performance trends over the past 6 months</p>
+        <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200/50">
           <CompanyTrendChart data={companyTrendData} height={500} />
         </div>
       </div>
       </SectionWrapper>
 
-      {/* Info Modal */}
       <Modal
         isOpen={showInfoModal}
         onClose={() => setShowInfoModal(false)}
@@ -97,14 +89,13 @@ export default function Company_Level_Trend() {
         </div>
       </Modal>
 
-      {/* Fullscreen Modal */}
       <Modal
         isOpen={showFullscreen}
         onClose={() => setShowFullscreen(false)}
         title="Company-Level Trend (6 months)"
         size="full"
       >
-        <div className="h-[80vh]">
+        <div className="h-[60vh] sm:h-[70vh] md:h-[80vh]">
           <CompanyTrendChart data={companyTrendData} height={700} />
         </div>
       </Modal>
