@@ -67,7 +67,6 @@ def filter_carry_over_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataF
     if 'Updated' in df.columns:
         df['Updated'] = pd.to_datetime(df['Updated'], utc=True, errors='coerce')
     
-    # Determine status column
     status_col = None
     if 'Status Category (Mapped)' in df.columns:
         status_col = 'Status Category (Mapped)'
@@ -76,18 +75,14 @@ def filter_carry_over_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataF
     elif 'Status Category' in df.columns:
         status_col = 'Status Category'
 
-    # Base condition: Created before start
     created_before = df['Created'] < start_dt
     
     if status_col and 'Resolved' in df.columns:
-        # Ensure Resolved is datetime
         df['Resolved'] = pd.to_datetime(df['Resolved'], utc=True, errors='coerce')
         
-        # Not Done Carry Over: Updated in period AND Status != Done
         updated_in_period = (df['Updated'] >= start_dt) & (df['Updated'] <= end_dt)
         not_done = df[status_col].astype(str) != 'Done'
         
-        # Done Carry Over: Resolved in period AND Status == Done
         resolved_in_period = (df['Resolved'] >= start_dt) & (df['Resolved'] <= end_dt)
         is_done = df[status_col].astype(str) == 'Done'
         
@@ -96,7 +91,6 @@ def filter_carry_over_activities(df: pd.DataFrame, start_dt, end_dt) -> pd.DataF
             (resolved_in_period & is_done)
         )
     else:
-        # Fallback if no status info
         carry_over_mask = (
             created_before &
             ((df['Updated'] >= start_dt) & (df['Updated'] <= end_dt))

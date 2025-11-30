@@ -14,12 +14,11 @@ from app.services.transitions_helper import pre_parse_transitions
 def _get_current_week_range():
     """Get the start (Monday) and end (Sunday) of the current week in UTC."""
     now = datetime.now(timezone.utc)
-    # Get Monday of current week (weekday() returns 0 for Monday, 6 for Sunday)
     days_since_monday = now.weekday()
     week_start = now - timedelta(days=days_since_monday)
     week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
     
-    # Get Sunday of current week (end of week)
+
     week_end = week_start + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
     
     return week_start, week_end
@@ -107,7 +106,6 @@ def get_executive_summary():
             
             period_start, period_end = _validate_date_range(period_start, period_end)
         else:
-            # Default to current week
             period_start, period_end = _get_current_week_range()
             period_start, period_end = _validate_date_range(period_start, period_end)
         
@@ -139,8 +137,7 @@ def get_executive_summary():
             status_col=status_col
         )
         
-        # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
-        # Ensure it exists, otherwise calculate it
+        
         if 'Lead Time (Days)' not in done_issues.columns:
             done_issues['Created'] = pd.to_datetime(done_issues['Created'], utc=True, errors='coerce')
             done_issues['Resolved'] = pd.to_datetime(done_issues['Resolved'], utc=True, errors='coerce')

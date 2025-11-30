@@ -4,13 +4,10 @@ import json
 from datetime import datetime, timedelta, timezone
 from app.services.changelog_processor import (
     get_status_at_date,
-    is_in_progress_at_date,
-    was_completed_during_period,
     extract_status_transitions,
     calculate_lead_time_from_transitions,
     analyze_rework_patterns,
-    analyze_qa_transitions,
-    is_active_status
+    analyze_qa_transitions
 )
 from app.services.resolution_utils import (
     count_done_during_period
@@ -228,28 +225,19 @@ def calculate_weekly_flow(df_issues, start_date, num_weeks=12, df_sprints=None, 
         carry_over = filter_carry_over_activities(week_issues, week_start, effective_week_end)
         carry_over_count = len(carry_over)
 
-        # In Progress: Count all items in period (Created OR Updated during week) 
-        # with status 'In Progress' or 'In QA', regardless of resolution status.
-        # This matches team-performance-dashboard approach which counts all items 
-        # in the period with the status, not just unresolved ones.
-        
         week_issues['Created'] = pd.to_datetime(week_issues['Created'], utc=True, errors='coerce')
         week_issues['Updated'] = pd.to_datetime(week_issues['Updated'], utc=True, errors='coerce')
         
-        # Get all items that were Created OR Updated during the week (planned activities)
         planned_during_week = week_issues[
             ((week_issues['Created'] >= week_start) & (week_issues['Created'] <= effective_week_end)) |
             ((week_issues['Updated'] >= week_start) & (week_issues['Updated'] <= effective_week_end))
         ].copy()
         
-        # Count items with status 'In Progress' or 'In QA' in the planned activities
-        # This matches team-performance-dashboard: simple count based on status category
         if status_col in planned_during_week.columns:
             in_progress = planned_during_week[
                 planned_during_week[status_col].isin(['In Progress', 'In QA'])
             ]
         else:
-            # Fallback if mapped status not available (should not happen with clean data)
             in_progress = pd.DataFrame()
             
         in_progress_count = len(in_progress)
@@ -575,7 +563,6 @@ def calculate_company_trend(df_issues, period_start, num_months=6, period_end=No
     df_issues = df_issues.copy()
     df_issues['Created'] = pd.to_datetime(df_issues['Created'], utc=True, errors='coerce')
     df_issues['Resolved'] = pd.to_datetime(df_issues['Resolved'], utc=True, errors='coerce')
-    # Use pre-calculated Lead Time (Days) from data cleaning (matches Dash dashboard approach)
     if 'Lead Time (Days)' in df_issues.columns:
         df_issues['Lead Time (days)'] = df_issues['Lead Time (Days)']
     else:
@@ -789,7 +776,7 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
                             except:
                                 pass
 
-                    # 2. Calculate Failed QA (for ALL issues, including Bugs)
+
                     if transitions:
                         try:
                             qa_analysis = analyze_qa_transitions(transitions)
@@ -845,7 +832,7 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
                 issue_type = str(row.get('Issue Type', '')).lower()
                 is_bug = issue_type in ['bug', 'bugfix', 'bug fix']
                 
-                # Check if issue was active in this week
+                
                 issue_created = pd.to_datetime(row.get('Created'), utc=True, errors='coerce')
                 issue_updated = pd.to_datetime(row.get('Updated'), utc=True, errors='coerce')
                 issue_resolved = pd.to_datetime(row.get('Resolved'), utc=True, errors='coerce')
@@ -863,10 +850,8 @@ def calculate_qa_vs_failed(df_issues, period_start, period_end, group_by='sprint
 
 
                 if is_bug:
-                    # Bug/BugFix issues are automatically considered as 1 QA execution
                     issue_qa_executed = 1
                 else:
-                    # For other issues, check transitions for entering QA
                     if transitions:
                         try:
                             qa_analysis = analyze_qa_transitions(transitions)

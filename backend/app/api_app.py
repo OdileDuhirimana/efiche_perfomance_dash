@@ -19,7 +19,6 @@ def create_api_app():
     """Create and configure the Flask API application."""
     app = Flask(__name__)
     
-    # Enable CORS for frontend integration (if available)
     if CORS_AVAILABLE:
         CORS(app, resources={
             r"/api/*": {
@@ -29,7 +28,6 @@ def create_api_app():
             }
         })
     else:
-        # Manual CORS headers if flask-cors is not available
         @app.after_request
         def after_request(response):
             response.headers.add('Access-Control-Allow-Origin', '*')
@@ -37,10 +35,9 @@ def create_api_app():
             response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
             return response
     
-    # Register API routes
     app.register_blueprint(api_bp)
     
-    # Initialize data cache on startup
+    
     def initialize_data():
         """Pre-load data cache on startup."""
         try:
@@ -51,11 +48,9 @@ def create_api_app():
             print(f"⚠️ Warning: Error initializing data cache: {e}")
             print("   Data will be fetched on first request")
     
-    # Initialize data on app creation
     with app.app_context():
         initialize_data()
     
-    # Health check at root
     @app.route('/')
     def root():
         from flask import jsonify
